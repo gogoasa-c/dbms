@@ -127,7 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dummy.cpp" />
     <ClCompile Include="sqlite.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dummy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

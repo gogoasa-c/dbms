@@ -18,5 +18,13 @@
     <ClCompile Include="sqlite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dummy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dummy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
