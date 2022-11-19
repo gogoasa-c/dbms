@@ -26,7 +26,7 @@ string* split_string_into_words(string userInput)
 	for (i = 0; i < controlSize; i++) {
 		word[i] = "";
 	}
-	word[0] = j;													//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
+	word[0] = to_string(j);											//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
 	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
 	for (i = 0; i < userInput.size(); i++) {
 		if (userInput[i] != ' ') {
@@ -34,7 +34,7 @@ string* split_string_into_words(string userInput)
 		}
 		if (startedTyping) {										//adica != 0
 			j++;													//odata ce nu avem space-uri, se ajunge la primul cuvant, apoi al doilea si tot asa
-			word[0] = j;											//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
+			word[0] = to_string(j);									//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
 			if (j >= controlSize) {									//pentru alocare dinamica
 				string* aux = new string[controlSize];
 				for (k = 0; k < controlSize; k++) {
@@ -54,6 +54,8 @@ string* split_string_into_words(string userInput)
 		}
 	}
 
+	//!!!NU UITAM SA DEZALOCAM MEMORIA DUPA CE NU MAI AVEM NEVOIE DE VECTORUL DE CUVINTE!!!
+ 
 	//delete[] word													//asta se va face probabil in constructorii din clasele care isi creaza metodele pe baza argumentelor functiilor sql
 	delete[] aux;
 	return word;
@@ -61,7 +63,7 @@ string* split_string_into_words(string userInput)
 
 int identify_command_type(string* word) {
 	if (word[2] == "table") return 0;
-	//if (word[2] == "index") return 999; //optional conform cerintei
+	//if (word[2] == "index") return 999;							//optional conform cerintei
 	if (word[1] == "insert") return 1;
 	if (word[1] == "select") return 2;
 	if (word[1] == "update") return 3;
