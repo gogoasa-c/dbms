@@ -20,12 +20,9 @@ string take_user_input_and_convert_lowercase()
 string* split_string_into_words(string userInput)
 {
 	int controlSize = 100;											//controlam size-ul array-ului de string alocat dinamic
-	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter
+	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter ;; word[index] = ""
 	string* aux = NULL;
 	int i, j = 0, k;												//i = initial contor apoi index pt a cata litera din string ;; j = index pt al catelea cuvant formam ;; k = index similar lui j dar folosim pt resize de word prin ajutorul lui aux 
-	for (i = 0; i < controlSize; i++) {
-		word[i] = "";
-	}
 	word[0] = to_string(j);											//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
 	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
 	for (i = 0; i < userInput.size(); i++) {
