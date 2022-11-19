@@ -18,12 +18,12 @@
     <ClCompile Include="sqlite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dummy.cpp">
+    <ClCompile Include="implementare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="dummy.h">
+    <ClInclude Include="clase_si_functii.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
