@@ -22,14 +22,14 @@ Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 	}
 }
 
-ostream& operator<<(ostream& out, const Table& tab) {
+ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << endl;
 		out << "\n                    " << tab.name << "                    ";
 		out << endl;
 		out << "+---------------Table--------------------+";
 		
 		out << endl;
-		for (int i = 0; i < tab.tableHead.size(); i++) {
+		for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
 			out << tab.tableHead[i] << "/";
 			out << tab.dataType[i] << "/";
 			out << tab.dataSize[i] << "/";
@@ -105,12 +105,23 @@ string* split_string_into_words(string userInput)
 }
 
 int identify_command_type(string* word, vector<Table>& tables) {
-	if (word[2] == "table") {
-		if (word[1] == "create") {
-			Table currTable(word);
-			tables.push_back(currTable);
+	if (word[2] == "table") { //daca e vorba de o comanda ce implica table
+		if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
+			int exists = 0;
+			for (int i = 0; i < tables.size(); i++) {
+				if (tables[i].name == word[3]) {
+					exists = 1;
+				}
+			}
+			if(!exists) {
+				Table currTable(word);
+				tables.push_back(currTable);
+			}
+			else {
+				cout << "\nTabelul " << word[3] << " deja exista!";
+			}
 		}
-		else if(word[1] == "drop") {
+		else if(word[1] == "drop") { //altfel vedem daca e drop, daca da, droppam tabelul daca are numele introdus
 			int noModif = 1;
 			for (int i = 0; i < tables.size(); i++) {
 				if (tables[i].name == word[3]) {
@@ -123,7 +134,7 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			}
 
 		}
-		else if(word[1] == "display") {
+		else if(word[1] == "display") { //altfel vedem daca e display, daca da, il afisam, daca exista
 			int noModif = 1;
 			for (int i = 0; i < tables.size(); i++) {
 				if (tables[i].name == word[3]) {
