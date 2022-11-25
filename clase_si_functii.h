@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos
 using namespace std;
 
 
@@ -19,6 +20,10 @@ class Table {
 public:
 	Table();
 	Table(string* word);
+
+	friend int identify_command_type(string* word, vector<Table>& tables);
+
+	
 };
 
 
@@ -30,5 +35,5 @@ string* split_string_into_words(string);			//imparte string-ul initial in vector
 													//vom putea refolosi functia si pt a pasa la clase cuvant cu cuvant stringul si a asigna corespunzator
 													//membrilor valorile din argumente
 
-int identify_command_type(string*, vector<Table>&);					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
+int identify_command_type(string* word, vector<Table>& tables)					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
 

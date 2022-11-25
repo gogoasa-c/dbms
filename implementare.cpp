@@ -12,10 +12,10 @@ Table::Table() {
 
 Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 	int size = stoi(word[0]);
-	int i = 3;
-	this->name = word[i++];
-	while(i <= size) {
-		this->tableHead.push_back(word[i++]);
+	int i = 3; //incepe cu poz 3 unde sunt efectiv argumentele lui create table
+	this->name = word[i++]; //ia numele de pe poz 3 si creste i
+	while(i <= size) { //ia fiecare nume de coloana, dataType, dataSize, dataSize, implicitValue si le baga in vectorii aferenti
+		this->tableHead.push_back(word[i++]); 
 		this->dataType.push_back(word[i++]);
 		this->dataSize.push_back(stoi(word[i++]));
 		this->implicitValue.push_back(word[i++]);
@@ -31,7 +31,7 @@ string take_user_input_and_convert_lowercase()
 			userInput[i] += 32;										//value of 'a' - 'A'
 		}
 	}
-	// TEO A FACUT O MODIFICARE
+	
 	
 	return userInput;
 }
@@ -83,12 +83,20 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			Table currTable(word);
 			tables.push_back(currTable);
 		}
+		else if(word[1] == "drop") {
+			for (int i = 0; i < tables.size(); i++) {
+				(tables[i].name)
+			}
+		}
 		else {
-			cout << "comanda notbuna";
+
 		}
 	}
 	//if (word[2] == "index") return 999;							//optional conform cerintei
-	if (word[1] == "insert") return 1;
+	if (word[1] == "insert") {
+
+	}
+	
 	if (word[1] == "select") return 2;
 	if (word[1] == "update") return 3;
 	if (word[1] == "delete") return 4;
