@@ -6,7 +6,16 @@
 #include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos
 using namespace std;
 
+class Entry {//clasa entry care va constitui un vector<Entry> entries in clasa Table
+	int numberArguments;//numar argumente
+	string* arguments;//vector de string-uri alocat dinamic
+public:
+	Entry(int); 
 
+	Entry(int, string*);
+
+	~Entry();
+};
 
 class Table {
 	string name;													//nume tabel
@@ -14,7 +23,8 @@ class Table {
 	vector<string> dataType;
 	vector<int> dataSize;
 	vector<string> implicitValue;
-	vector<vector<string>> entries;									//matrice de string-uri unde stocam inregistrarile tabelului
+	//vector<vector<string>> entries;									//matrice de string-uri unde stocam inregistrarile tabelului
+	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
 	//fiecare linie din vector e aferenta unei inregistrari; entries[i] = inregistrarea i
 	//fiecare coloana are cate o valoare; entries[i][j] = tableHead[j]
 public:

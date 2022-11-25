@@ -4,7 +4,23 @@
 using namespace std;
 
 
+Entry::Entry(int newNumberArguments):numberArguments(newNumberArguments) { 
+	this->arguments = new string[numberArguments];
 
+}
+
+Entry::Entry(int newNumberArguments, string* newArguments) :numberArguments(newNumberArguments) {
+	this->arguments = new string[numberArguments];
+	for (int i = 0; i < numberArguments; i++) {
+		this->arguments[i] = newArguments[i];
+	}
+}
+
+Entry::~Entry() {
+	if (this->arguments != nullptr) {
+		delete[] this->arguments;
+	}
+}
 
 Table::Table() {
 
@@ -20,6 +36,7 @@ Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 		this->dataSize.push_back(stoi(word[i++]));
 		this->implicitValue.push_back(word[i++]);
 	}
+	
 }
 
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
@@ -29,21 +46,23 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << "+---------------Table--------------------+";
 		
 		out << endl;
+		out << "|";
 		for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
 			out << tab.tableHead[i] << "/";
 			out << tab.dataType[i] << "/";
 			out << tab.dataSize[i] << "/";
 			out << tab.implicitValue[i] << "\t";
 		}
+		out << "|";
 		out << endl;
 		out << "+-----------------------------------------+";
 		out << endl;
-		for (int i = 0; i < tab.entries.size(); i++) {
+		/*for (int i = 0; i < tab.entries.size(); i++) {
 			out << i << ".\t";
 			for (int j = 0; j < tab.entries[i].size(); i++) {
 				out << tab.entries[i][j] << "\t";
 			}
-		}
+		}*/
 		
 		
 		return out;
