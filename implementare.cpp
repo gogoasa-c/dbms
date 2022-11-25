@@ -22,6 +22,33 @@ Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 	}
 }
 
+ostream& operator<<(ostream& out, const Table& tab) {
+		out << endl;
+		out << "\n                    " << tab.name << "                    ";
+		out << endl;
+		out << "+---------------Table--------------------+";
+		
+		out << endl;
+		for (int i = 0; i < tab.tableHead.size(); i++) {
+			out << tab.tableHead[i] << "/";
+			out << tab.dataType[i] << "/";
+			out << tab.dataSize[i] << "/";
+			out << tab.implicitValue[i] << "\t";
+		}
+		out << endl;
+		out << "+-----------------------------------------+";
+		out << endl;
+		for (int i = 0; i < tab.entries.size(); i++) {
+			out << i << ".\t";
+			for (int j = 0; j < tab.entries[i].size(); i++) {
+				out << tab.entries[i][j] << "\t";
+			}
+		}
+		
+		
+		return out;
+}
+
 string take_user_input_and_convert_lowercase()
 {
 	string userInput = "";
@@ -84,12 +111,29 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			tables.push_back(currTable);
 		}
 		else if(word[1] == "drop") {
+			int noModif = 1;
 			for (int i = 0; i < tables.size(); i++) {
-				(tables[i].name)
+				if (tables[i].name == word[3]) {
+					tables.erase(tables.begin() + i);
+					noModif = 0;
+				}
 			}
-		}
-		else {
+			if (noModif) {
+				cout << "\nNu exista tabelul " << word[3];
+			}
 
+		}
+		else if(word[1] == "display") {
+			int noModif = 1;
+			for (int i = 0; i < tables.size(); i++) {
+				if (tables[i].name == word[3]) {
+					cout << tables[i];
+					noModif = 0;
+				}
+			}
+			if (noModif) {
+				cout << "\nNu exista tabelul " << word[3];
+			}
 		}
 	}
 	//if (word[2] == "index") return 999;							//optional conform cerintei
