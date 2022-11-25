@@ -104,57 +104,68 @@ string* split_string_into_words(string userInput)
 	return word;
 }
 
-int identify_command_type(string* word, vector<Table>& tables) {
-	if (word[2] == "table") { //daca e vorba de o comanda ce implica table
-		if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
-			int exists = 0;
-			for (int i = 0; i < tables.size(); i++) {
-				if (tables[i].name == word[3]) {
-					exists = 1;
-				}
-			}
-			if(!exists) {
-				Table currTable(word);
-				tables.push_back(currTable);
-			}
-			else {
-				cout << "\nTabelul " << word[3] << " deja exista!";
-			}
+void identify_command_type(string* word, vector<Table>& tables) {
+	while (true) {
+		if (word[1] == "exit") {
+			break;
 		}
-		else if(word[1] == "drop") { //altfel vedem daca e drop, daca da, droppam tabelul daca are numele introdus
-			int noModif = 1;
-			for (int i = 0; i < tables.size(); i++) {
-				if (tables[i].name == word[3]) {
-					tables.erase(tables.begin() + i);
-					noModif = 0;
+		else {
+			if (word[2] == "table") { //daca e vorba de o comanda ce implica table
+				if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
+					int exists = 0;
+					for (int i = 0; i < tables.size(); i++) {
+						if (tables[i].name == word[3]) {
+							exists = 1;
+						}
+					}
+					if (!exists) {
+						Table currTable(word);
+						tables.push_back(currTable);
+					}
+					else {
+						cout << "\nTabelul " << word[3] << " deja exista!";
+					}
+				}
+				else if (word[1] == "drop") { //altfel vedem daca e drop, daca da, droppam tabelul daca are numele introdus
+					int noModif = 1;
+					for (int i = 0; i < tables.size(); i++) {
+						if (tables[i].name == word[3]) {
+							tables.erase(tables.begin() + i);
+							noModif = 0;
+						}
+					}
+					if (noModif) {
+						cout << "\nNu exista tabelul " << word[3];
+					}
+
+				}
+				else if (word[1] == "display") { //altfel vedem daca e display, daca da, il afisam, daca exista
+					int noModif = 1;
+					for (int i = 0; i < tables.size(); i++) {
+						if (tables[i].name == word[3]) {
+							cout << tables[i];
+							noModif = 0;
+						}
+					}
+					if (noModif) {
+						cout << "\nNu exista tabelul " << word[3];
+					}
 				}
 			}
-			if (noModif) {
-				cout << "\nNu exista tabelul " << word[3];
+			//if (word[2] == "index") return 999;							//optional conform cerintei
+			if (word[1] == "insert") {
+
 			}
 
-		}
-		else if(word[1] == "display") { //altfel vedem daca e display, daca da, il afisam, daca exista
-			int noModif = 1;
-			for (int i = 0; i < tables.size(); i++) {
-				if (tables[i].name == word[3]) {
-					cout << tables[i];
-					noModif = 0;
-				}
-			}
-			if (noModif) {
-				cout << "\nNu exista tabelul " << word[3];
-			}
+			//if (word[1] == "select") return 2;
+			//if (word[1] == "update") return 3;
+			//if (word[1] == "delete") return 4;
+			
+			delete[] word;
+			identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), tables);
+			
+			//return -1;
 		}
 	}
-	//if (word[2] == "index") return 999;							//optional conform cerintei
-	if (word[1] == "insert") {
-
-	}
-	
-	if (word[1] == "select") return 2;
-	if (word[1] == "update") return 3;
-	if (word[1] == "delete") return 4;
-	
-	return -1;
+	//return 0;
 }

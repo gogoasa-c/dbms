@@ -22,7 +22,7 @@ public:
 	Table(string* word);
 
 	friend ostream& operator<<(ostream&, const Table&);
-	friend int identify_command_type(string*, vector<Table>&);
+	friend void identify_command_type(string*, vector<Table>&);
 
 	
 };
@@ -36,5 +36,5 @@ string* split_string_into_words(string);			//imparte string-ul initial in vector
 													//vom putea refolosi functia si pt a pasa la clase cuvant cu cuvant stringul si a asigna corespunzator
 													//membrilor valorile din argumente
 
-int identify_command_type(string*, vector<Table>&);					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
+void identify_command_type(string*, vector<Table>&);					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
 
