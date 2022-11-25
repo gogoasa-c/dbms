@@ -1,8 +1,26 @@
 //aici implementam clasele si functiile propriu-zis
 #include "clase_si_functii.h"
-#include <iostream>
-#include <string>
+
 using namespace std;
+
+
+
+
+Table::Table() {
+
+}
+
+Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
+	int size = stoi(word[0]);
+	int i = 3;
+	this->name = word[i++];
+	while(i <= size) {
+		this->tableHead.push_back(word[i++]);
+		this->dataType.push_back(word[i++]);
+		this->dataSize.push_back(stoi(word[i++]));
+		this->implicitValue.push_back(word[i++]);
+	}
+}
 
 string take_user_input_and_convert_lowercase()
 {
@@ -23,17 +41,17 @@ string* split_string_into_words(string userInput)
 	int controlSize = 100;											//controlam size-ul array-ului de string alocat dinamic
 	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter ;; word[index] = ""
 	string* aux = NULL;
-	int i, j = 0, k;												//i = initial contor apoi index pt a cata litera din string ;; j = index pt al catelea cuvant formam ;; k = index similar lui j dar folosim pt resize de word prin ajutorul lui aux 
-	word[0] = to_string(j);											//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
+	int i, numberWords = 0, k;										//i = initial contor apoi index pt a cata litera din string ;; numberWords = index pt al catelea cuvant formam ;; k = index similar lui numberWords dar folosim pt resize de word prin ajutorul lui aux 
+	word[0] = to_string(numberWords);								//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
 	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
 	for (i = 0; i < userInput.size(); i++) {
 		if (userInput[i] != ' ') {
 			startedTyping++;
 		}
 		if (startedTyping) {										//adica != 0
-			j++;													//odata ce nu avem space-uri, se ajunge la primul cuvant, apoi al doilea si tot asa
-			word[0] = to_string(j);									//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
-			if (j >= controlSize) {									//pentru alocare dinamica
+			numberWords++;											//odata ce nu avem space-uri, se ajunge la primul cuvant, apoi al doilea si tot asa
+			word[0] = to_string(numberWords);						//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
+			if (numberWords >= controlSize) {						//pentru alocare dinamica
 				string* aux = new string[controlSize];
 				for (k = 0; k < controlSize; k++) {
 					aux[k] = word[k];
@@ -46,7 +64,7 @@ string* split_string_into_words(string userInput)
 				}
 			}
 			while (userInput[i] != ' ' && i < userInput.size()) {
-				word[j] += userInput[i++];							//cat timp nu avem space-uri, adugam literele la cuvantul j pt a forma intregul argument cuvant[j]
+				word[numberWords] += userInput[i++];				//cat timp nu avem space-uri, adugam literele la cuvantul numberWords pt a forma intregul argument cuvant[numberWords]
 			}
 			startedTyping = 0;										//s-a ajuns la space, astfel ca incetam tastarea/adugarea argumentului trecut si trecem mai departe
 		}
@@ -59,13 +77,21 @@ string* split_string_into_words(string userInput)
 	return word;
 }
 
-int identify_command_type(string* word) {
-	if (word[2] == "table") return 0;
+int identify_command_type(string* word, vector<Table>& tables) {
+	if (word[2] == "table") {
+		if (word[1] == "create") {
+			Table currTable(word);
+			tables.push_back(currTable);
+		}
+		else {
+			cout << "comanda notbuna";
+		}
+	}
 	//if (word[2] == "index") return 999;							//optional conform cerintei
 	if (word[1] == "insert") return 1;
 	if (word[1] == "select") return 2;
 	if (word[1] == "update") return 3;
 	if (word[1] == "delete") return 4;
-
+	
 	return -1;
 }
