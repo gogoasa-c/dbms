@@ -13,6 +13,7 @@ string take_user_input_and_convert_lowercase()
 			userInput[i] += 32;										//value of 'a' - 'A'
 		}
 	}
+	// TEO A FACUT O MODIFICARE
 	
 	return userInput;
 }
