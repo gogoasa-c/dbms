@@ -1,3 +1,5 @@
+
+
 //aici gasim antetul/definitiile claselor si functiilor
 #pragma once
 #include <iostream>
@@ -11,8 +13,9 @@ class Entry {//clasa entry care va constitui un vector<Entry> entries in clasa T
 	string* arguments;//vector de string-uri alocat dinamic
 public:
 	Entry(int); 
-
 	Entry(int, string*);
+
+	friend ostream& operator<< (ostream&, const Entry&);
 
 	~Entry();
 };
@@ -31,8 +34,10 @@ public:
 	Table();
 	Table(string* word);
 
+	string getName();
+
 	friend ostream& operator<<(ostream&, const Table&);
-	friend void identify_command_type(string*, vector<Table>&);
+	friend int identify_command_type(string*, vector<Table>&);
 
 	
 };
@@ -46,5 +51,8 @@ string* split_string_into_words(string);			//imparte string-ul initial in vector
 													//vom putea refolosi functia si pt a pasa la clase cuvant cu cuvant stringul si a asigna corespunzator
 													//membrilor valorile din argumente
 
-void identify_command_type(string*, vector<Table>&);					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
+bool TableExists(string, vector<Table>&);//verifica daca tabelul exista in vectorul de tabele
+bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista in vectorul de tabele si in int& modifica pozitia pe care l-a gasit
+
+int identify_command_type(string*, vector<Table>&);					//returneaza 0 pt lucru cu TABLE, 1-4 pt comenzi CRUD
 

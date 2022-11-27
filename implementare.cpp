@@ -9,10 +9,22 @@ Entry::Entry(int newNumberArguments):numberArguments(newNumberArguments) {
 
 }
 
-Entry::Entry(int newNumberArguments, string* newArguments) :numberArguments(newNumberArguments) {
-	this->arguments = new string[numberArguments];
-	for (int i = 0; i < numberArguments; i++) {
-		this->arguments[i] = newArguments[i];
+Entry::Entry(int newNumberArguments, string* newArguments) {
+	try{
+		if ((stoi(newArguments[0]) - 4) != newNumberArguments) { //scad 4 ca sa nu numaram si primele 4 cuvinte din comanda: insert into table_name values 
+			exception e("\nNumar invalid de argumente!");
+			throw e;
+		}
+		this->numberArguments = newNumberArguments;
+		this->arguments = new string[numberArguments];
+		int j = 0;
+		for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
+			this->arguments[j] = newArguments[i];
+			++j;
+		}
+	}
+	catch (exception e) {
+		cout << e.what();
 	}
 }
 
@@ -39,6 +51,17 @@ Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 	
 }
 
+string Table::getName() {
+	return this->name;
+}
+
+ostream& operator<< (ostream& out, const Entry& ent) {
+	for (int i = 0; i < ent.numberArguments; i++) {
+		out << ent.arguments[i] << '\t';
+	}
+	return out;
+}
+
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << endl;
 		out << "\n                    " << tab.name << "                    ";
@@ -46,14 +69,14 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << "+---------------Table--------------------+";
 		
 		out << endl;
-		out << "|";
+		
 		for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
 			out << tab.tableHead[i] << "/";
 			out << tab.dataType[i] << "/";
 			out << tab.dataSize[i] << "/";
 			out << tab.implicitValue[i] << "\t";
 		}
-		out << "|";
+		
 		out << endl;
 		out << "+-----------------------------------------+";
 		out << endl;
@@ -63,7 +86,9 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 				out << tab.entries[i][j] << "\t";
 			}
 		}*/
-		
+		for (int i = 0; i < tab.entries.size(); i++) {
+			out << tab.entries[i] << "\n";
+		}
 		
 		return out;
 }
@@ -123,68 +148,124 @@ string* split_string_into_words(string userInput)
 	return word;
 }
 
-void identify_command_type(string* word, vector<Table>& tables) {
-	while (true) {
-		if (word[1] == "exit") {
-			break;
+bool TableExists(string word, vector<Table>& tables) {
+	for (int i = 0; i < tables.size(); i++) {
+		if (word == tables[i].getName()) {
+			return true;
 		}
-		else {
-			if (word[2] == "table") { //daca e vorba de o comanda ce implica table
-				if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
-					int exists = 0;
-					for (int i = 0; i < tables.size(); i++) {
-						if (tables[i].name == word[3]) {
-							exists = 1;
-						}
-					}
-					if (!exists) {
-						Table currTable(word);
-						tables.push_back(currTable);
-					}
-					else {
-						cout << "\nTabelul " << word[3] << " deja exista!";
-					}
-				}
-				else if (word[1] == "drop") { //altfel vedem daca e drop, daca da, droppam tabelul daca are numele introdus
-					int noModif = 1;
-					for (int i = 0; i < tables.size(); i++) {
-						if (tables[i].name == word[3]) {
-							tables.erase(tables.begin() + i);
-							noModif = 0;
-						}
-					}
-					if (noModif) {
-						cout << "\nNu exista tabelul " << word[3];
-					}
+	}
+	return false;
+}
+bool TableExists(string word, vector<Table>& tables, int& position) {
+	for (int i = 0; i < tables.size(); i++) {
+		if (word == tables[i].getName()) {
+			position = i;
+			return true;
+		}
+	}
+	return false;
+}
 
-				}
-				else if (word[1] == "display") { //altfel vedem daca e display, daca da, il afisam, daca exista
-					int noModif = 1;
-					for (int i = 0; i < tables.size(); i++) {
-						if (tables[i].name == word[3]) {
-							cout << tables[i];
-							noModif = 0;
-						}
-					}
-					if (noModif) {
-						cout << "\nNu exista tabelul " << word[3];
-					}
-				}
+bool no_missing_arguments(string* word) {
+	try{
+		if (stoi(word[0]) < 3 && word[1] != "exit") {
+			exception* e = new exception("\nNu exista nicio comanda cu structura introdusa!");
+			throw e;
+			return false;
+		}
+		else if (word[1] == "create") {
+			if (word[2] == "table") {
+				
 			}
-			//if (word[2] == "index") return 999;							//optional conform cerintei
-			if (word[1] == "insert") {
+			else {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2 ...");
+				throw e;
+				return false;
+			}
+		}
+		else if (word[1] == "drop") {
+
+		}
+		else if (word[1] == "display") {
+
+		}
+		else if (word[1] == "insert") {
+			if (word[2] == "into") {
 
 			}
-
-			//if (word[1] == "select") return 2;
-			//if (word[1] == "update") return 3;
-			//if (word[1] == "delete") return 4;
-			
-			delete[] word;
-			identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), tables);
-			
-			//return -1;
+			else {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+				throw e;
+				return false;
+			}
 		}
+		return true;
+	}
+	catch (exception* e) {
+		cout << "\n" << e->what();
+	}
+}
+
+int identify_command_type(string* word, vector<Table>& tables) {
+	if (word[1] == "exit") {
+		return 0;
+	}
+	else {
+		if (word[2] == "table") { //daca e vorba de o comanda ce implica table
+			if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
+				bool exists = TableExists(word[3], tables);
+				
+				if (!exists) {
+					Table currTable(word);
+					tables.push_back(currTable);
+				}
+				else {
+					cout << "\nTabelul " << word[3] << " deja exista!";
+				}
+			}
+			else if (word[1] == "drop") { //altfel vedem daca e drop, daca da, droppam tabelul daca are numele introdus
+				int position = -1;
+				bool exists = TableExists(word[3], tables, position);
+				if (!exists) {
+					cout << "\nNu exista tabelul " << word[3];
+				}
+				else {
+					tables.erase(tables.begin() + position);
+				}
+
+			}
+			else if (word[1] == "display") { //altfel vedem daca e display, daca da, il afisam, daca exista
+				int position = -1;
+				bool exists = TableExists(word[3], tables, position);
+				if (!exists) {
+					cout << "\nNu exista tabelul " << word[3];
+				}
+				else {
+					cout << tables[position];
+				}
+			}
+		}
+		//if (word[2] == "index") return 999;							//optional conform cerintei
+		if (word[1] == "insert") {
+			int position = -1;
+			bool exists = TableExists(word[3], tables, position);
+			if(exists) {
+				Entry ent(tables[position].tableHead.size(), word);
+				tables[position].entries.push_back(ent);
+			}
+			else {
+			
+			}
+		}
+
+		//if (word[1] == "select") return 2;
+		//if (word[1] == "update") return 3;
+		//if (word[1] == "delete") return 4;
+		
+		delete[] word;
+		//identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), tables);
+		return 1;
+		//return -1;
 	}
 	//return 0;
 }
