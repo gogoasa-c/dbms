@@ -25,6 +25,8 @@ Entry::Entry(int newNumberArguments, string* newArguments) {
 	}
 	catch (exception e) {
 		cout << e.what();
+		this->numberArguments = 0;
+		this->arguments = nullptr;
 	}
 }
 
@@ -49,6 +51,15 @@ Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
 		this->implicitValue.push_back(word[i++]);
 	}
 	
+}
+
+Table::~Table() {
+
+}
+
+void Table::addEntry(int numberArguments, string* arguments, Table& table) {
+	Entry ent(numberArguments, arguments);
+	table.entries.push_back(ent);
 }
 
 string Table::getName() {
@@ -191,7 +202,7 @@ bool no_missing_arguments(string* word) {
 		}
 		else if (word[1] == "insert") {
 			if (word[2] == "into") {
-
+				 
 			}
 			else {
 				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
@@ -250,8 +261,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
-				Entry ent(tables[position].tableHead.size(), word);
-				tables[position].entries.push_back(ent);
+				Entry* ent = new Entry(tables[position].tableHead.size(), word); //nu stiu de ce nu merge help
+				tables[position].entries.push_back(*ent);
+				//tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
+				
 			}
 			else {
 			

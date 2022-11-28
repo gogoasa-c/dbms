@@ -33,13 +33,13 @@ class Table {
 public:
 	Table();
 	Table(string* word);
-
+	void addEntry(int, string*, Table&);
 	string getName();
 
 	friend ostream& operator<<(ostream&, const Table&);
 	friend int identify_command_type(string*, vector<Table>&);
 
-	
+	~Table();
 };
 
 
