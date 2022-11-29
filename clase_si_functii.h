@@ -12,9 +12,10 @@ class Entry {//clasa entry care va constitui un vector<Entry> entries in clasa T
 	int numberArguments;//numar argumente
 	string* arguments;//vector de string-uri alocat dinamic
 public:
+	Entry();
 	Entry(int); 
 	Entry(int, string*);
-
+	Entry(const Entry&);
 	friend ostream& operator<< (ostream&, const Entry&);
 
 	~Entry();
@@ -33,6 +34,8 @@ class Table {
 public:
 	Table();
 	Table(string* word);
+	Table(const Table&);
+
 	void addEntry(int, string*, Table&);
 	string getName();
 

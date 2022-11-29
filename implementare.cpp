@@ -3,6 +3,20 @@
 
 using namespace std;
 
+bool push_back_flag = false;
+
+Entry::Entry(const Entry& e) {
+	this->numberArguments = e.numberArguments;
+	this->arguments = new string[this->numberArguments];
+	for (int i = 0; i < numberArguments; i++) {
+		this->arguments[i] = e.arguments[i];
+	}
+}
+
+Entry::Entry() {
+	this->arguments = nullptr;
+	this->numberArguments = 0;
+}
 
 Entry::Entry(int newNumberArguments):numberArguments(newNumberArguments) { 
 	this->arguments = new string[numberArguments];
@@ -31,9 +45,18 @@ Entry::Entry(int newNumberArguments, string* newArguments) {
 }
 
 Entry::~Entry() {
-	if (this->arguments != nullptr) {
+	if (this->arguments != nullptr ) {
 		delete[] this->arguments;
 	}
+}
+
+Table::Table(const Table& t) {
+	this->name = t.name;
+	this->tableHead = t.tableHead;
+	this->dataType = t.dataType;
+	this->dataSize = t.dataSize;
+	this->implicitValue = t.implicitValue;
+	this->entries = t.entries;
 }
 
 Table::Table() {
@@ -58,8 +81,10 @@ Table::~Table() {
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
-	Entry ent(numberArguments, arguments);
-	table.entries.push_back(ent);
+	Entry* ent = new Entry(numberArguments, arguments);
+	push_back_flag = true;
+	table.entries.push_back(*ent);
+	push_back_flag = false;
 }
 
 string Table::getName() {
@@ -261,9 +286,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
-				Entry* ent = new Entry(tables[position].tableHead.size(), word); //nu stiu de ce nu merge help
-				tables[position].entries.push_back(*ent);
-				//tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
+				//Entry* ent = new Entry(tables[position].tableHead.size(), word); //nu stiu de ce nu merge help
+				//tables[position].entries.push_back(*ent); problema e cu push_back-ul asta
+				
+				tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
 				
 			}
 			else {
