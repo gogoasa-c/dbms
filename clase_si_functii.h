@@ -16,6 +16,20 @@ public:
 	Entry(int); 
 	Entry(int, string*);
 	Entry(const Entry&);
+
+	//----------------------------------------------------------------------
+
+	// GET
+
+	int getNumberArguments();
+	string* getArguments();
+
+	// SET
+
+	void setNumberArguments(int newNumberArguments, string* newArguments);
+
+	//----------------------------------------------------------------------
+
 	friend ostream& operator<< (ostream&, const Entry&);
 
 	~Entry();
@@ -37,7 +51,28 @@ public:
 	Table(const Table&);
 
 	void addEntry(int, string*, Table&);
+
+	//----------------------------------------------------------------------
+
+	// GET
+
 	string getName();
+	vector<string> getTableHead(); 
+	vector<string> getDataType();
+	vector<int> getDataSize();
+	vector<string> getImplicitValue();
+	vector<Entry> getEntries();
+
+	// SET
+
+	void setName(string newName);
+	void setTableHead(vector<string> newTableHead);
+	void setDataType(vector<string> newDataType);
+	void setDataSize(vector<int> newDataSize);
+	void setImplicitValue(vector<string> newImplicitValue);
+	void setEntries(vector<Entry> newEntries);
+
+	//----------------------------------------------------------------------
 
 	friend ostream& operator<<(ostream&, const Table&);
 	friend int identify_command_type(string*, vector<Table>&);

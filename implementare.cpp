@@ -87,10 +87,6 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 	push_back_flag = false;
 }
 
-string Table::getName() {
-	return this->name;
-}
-
 ostream& operator<< (ostream& out, const Entry& ent) {
 	for (int i = 0; i < ent.numberArguments; i++) {
 		out << ent.arguments[i] << '\t';
@@ -307,4 +303,107 @@ int identify_command_type(string* word, vector<Table>& tables) {
 		//return -1;
 	}
 	//return 0;
+}
+
+//---------------------------------> TABLE CLASS <-------------------------------------
+
+// GET for Table class
+
+string Table::getName() {
+	return this->name;
+}
+
+vector<string> Table::getTableHead()
+{
+	return this->tableHead;
+}
+
+vector<string> Table::getDataType()
+{
+	return this->dataType;
+}
+
+vector<int> Table::getDataSize()
+{
+	return this->dataSize;
+}
+
+vector<string> Table::getImplicitValue()
+{
+	return this->implicitValue;
+}
+
+vector<Entry> Table::getEntries()
+{
+	return this->entries;
+}
+
+// SET for Table class
+
+void Table::setName(string newName)
+{
+	if(newName.length()>1)
+	{
+		this->name = newName;
+	}
+}
+
+void Table::setTableHead(vector<string> newTableHead)
+{
+	if(!newTableHead.empty())
+	this->tableHead = newTableHead;
+}
+
+void Table::setDataType(vector<string> newDataType)
+{
+	if(!newDataType.empty())
+	this->dataType = newDataType;
+}
+
+void Table::setDataSize(vector<int> newDataSize)
+{
+	if(!newDataSize.empty())
+	this->dataSize = newDataSize;
+}
+
+void Table::setImplicitValue(vector<string> newImplicitValue)
+{
+	if(!newImplicitValue.empty())
+	this->implicitValue = newImplicitValue;
+}
+
+void Table::setEntries(vector<Entry> newEntries)
+{
+	if(!newEntries.empty())
+	this->entries = newEntries;
+}
+
+//---------------------------------> ENTRY CLASS <-------------------------------------
+
+// GET for Entry class
+
+int Entry::getNumberArguments()
+{
+	return this->numberArguments;
+}
+
+string* Entry::getArguments()
+{
+	return this->arguments;
+}
+
+// SET for Entry class
+
+void Entry::setNumberArguments(int newNumberArguments, string* newArguments)
+{
+	if (newNumberArguments > 0 && newArguments != nullptr)
+	{ 
+		delete[] this->arguments;
+		this->numberArguments = newNumberArguments;
+		this->arguments = new string[newNumberArguments];
+		for (int i = 0; i < newNumberArguments; i++)
+		{
+			this->arguments[i] = newArguments[i];
+		}
+	}
 }
