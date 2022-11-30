@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
     vector<Table> tables;
-    cout << "Alpha v1.5\n";
+    cout << "Alpha v1.5.2 spre 6 dar nu prea\n";
     cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 
     while (true) {
@@ -34,13 +34,29 @@ int main()
     
 
     /*TO DO LIST
-    * 1)break(exit) instruction does infinite loop in identify_command_type(); - doesnt ent program execution
-    * 2)identify command type doesn't check if missing arguments. ex:: word[3] = inexistent => mesaj aiurea
-    * 3)we could try to convert the functions that were implemented into classes
-    *   reference:
-    *           •	incepeti cu o functie/clasa generica care identifica tipul de comanda (SELECT, UPDATE etc.)
-                •   Implementati clase specifice care vor valida un format si parametri specifici tipului de comanda
-
+    * 
+    * 1) Functia "take_user_input_and_convert_lowercase()" se foloseste de functia "check_for_parenthesis_and_commas(string)" pentru a afisa mesaj de eroare daca sunt paranteze
+    * puse aiurea, insa nu stiu cum sa o fac sa nu iasa cu totul din executia programului main, ci doar sa ignore stringul eronat si sa astepte o noua comanda corespunzatoare,
+    * astfel ca am comentat parte din cod la functia "take_user_input_and_convert_lowercase()"
+    * 
+    * 2) Am "implementat" operatorul [], insa daca indexul este invalid, ar trebui sa returnam in continuare o referinta la clasa Entry, insa! problema este ca noi nu am implementat inca 
+    * comanda "delete from", rezultand in inabilitatea de a sterge inregistrarea eronata din nume_tabel.entries[index_handicapat].
+    * 
+    * 3) DE TESTAT: implementarea operatorilor :
+    *       - operatorii   >   <   >=   <=
+    *       - operator      ==
+    *       - operator      !
+    *       - operator      []
+    *       - operator      >>              //ex:   cin >> nume_tabel       (   istream& operator>>(istream& in, Table& tb)   )          
+    * 
+    * 
+    * 
+    *   NOTE IMPORTANTE DE CITIT:
+    * 
+    * 1) supraincarcarea operatorului >> pentru citire de entry noua in obiect de tip Table ar putea fi utilizat la implementarea comenzii UPDATE nume_tabela SET nume_coloana ...
+    * 
+    * 
+    * 
     */
 
     return 0;

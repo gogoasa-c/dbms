@@ -23,12 +23,15 @@ public:
 	void setDataSize(vector<int> newDataSize);
 	void setImplicitValue(vector<string> newImplicitValue);
 
+	int getNrColumns();
 	vector<string> getTableHead();
 	vector<string> getDataType();
 	vector<int> getDataSize();
 	vector<string> getImplicitValue();
 
 	friend ostream& operator <<(ostream&, const Header&);
+
+	//friend istream& operator>>(istream& in, Table& tb);
 
 	~Header();
 
@@ -42,6 +45,8 @@ public:
 	Entry(int); 
 	Entry(int, string*);
 	Entry(const Entry&);
+
+	bool operator==(const Entry&);
 
 	//----------------------------------------------------------------------
 
@@ -65,11 +70,20 @@ class Table {
 	string name;//nume tabel
 	Header head;
 	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
-	
+
 public:
 	Table();
 	Table(string* word);
 	Table(const Table&);
+
+	Entry& operator[](int);						//create table t; t[0] => t.entries[0]; word[2] = numetabel; word[2][0] => t.entries[0]
+
+	bool operator>(const Table&);
+	bool operator>=(const Table&);
+	bool operator<(const Table&);
+	bool operator<=(const Table&);
+
+	bool operator!();
 
 	void addEntry(int, string*, Table&);
 
@@ -78,18 +92,21 @@ public:
 	// GET
 
 	string getName();
-	
+
 	vector<Entry> getEntries();
 
 	// SET
 
 	void setName(string newName);
-	
+
 	void setEntries(vector<Entry> newEntries);
 
 	//----------------------------------------------------------------------
 
 	friend ostream& operator<<(ostream&, const Table&);
+
+	friend istream& operator>>(istream&, Table&);
+
 	friend int identify_command_type(string*, vector<Table>&);
 
 	~Table();
@@ -97,6 +114,9 @@ public:
 
 bool isNumber(string);
 bool no_missing_arguments(string*);
+
+bool check_for_parenthesis_and_commas(string);
+
 string take_user_input_and_convert_lowercase();		//preia inputul decat de la tastatura (eventual va trebui modificata pt a prelua si din fisiere)
 													//si converteste tot string-ul la lowercase pt a nu conta CAPS/NO CAPS
 

@@ -54,12 +54,18 @@ Entry::Entry(int newNumberArguments):numberArguments(newNumberArguments) {
 }
 
 Entry::Entry(int newNumberArguments, string* newArguments) {
-	this->numberArguments = newNumberArguments;
-	this->arguments = new string[numberArguments];
-	int j = 0;
-	for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
-		this->arguments[j] = newArguments[i];
-		++j;
+	if (newNumberArguments > 0 && newArguments != NULL) {
+		this->numberArguments = newNumberArguments;
+		this->arguments = new string[numberArguments];
+		int j = 0;
+		for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
+			this->arguments[j] = newArguments[i];
+			++j;
+		}
+	}
+	else {
+		this->numberArguments = 0;
+		this->arguments = NULL;
 	}
 }
 
@@ -101,6 +107,76 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 	catch (exception e) {
 		cout << e.what();
 	}
+}
+
+bool Entry::operator==(const Entry& ent) {
+	if (this->numberArguments != ent.numberArguments) {
+		return false;
+	}
+	if (this->numberArguments == ent.numberArguments) {
+		for (int i = 0; i < this->numberArguments; i++) {
+			if (this->arguments[i] != ent.arguments[i]) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+Entry& Table::operator[](int index) {
+	try {
+		if (index < 0 && index >= this->entries.size()) {
+			exception e("\nIndex invalid!\n");
+			throw e;
+		}
+
+		return this->entries[index];
+	}
+	catch (exception e) {
+		cout << e.what();
+
+		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!! (cumva undeva in afara functiei, in mod evident, dar Vali nu stie cum. PS: nici teol; bafta cristi!)
+		
+		/*Entry* ent = new Entry(0, NULL);
+		push_back_flag = true;
+		this->entries.push_back(*ent);
+		push_back_flag = false;
+		
+		return this->entries[this->entries.size() - 1];*/
+
+		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!!
+	}	
+}
+
+bool Table::operator>(const Table& aux) {
+	if (this->entries.size() > aux.entries.size())
+		return true;
+	return false;
+}
+
+bool Table::operator>=(const Table& aux) {
+	if (this->entries.size() >= aux.entries.size())
+		return true;
+	return false;
+}
+
+bool Table::operator<(const Table& aux) {
+	if (this->entries.size() < aux.entries.size())
+		return true;
+	return false;
+}
+
+bool Table::operator<=(const Table& aux) {
+	if (this->entries.size() <= aux.entries.size())
+		return true;
+	return false;
+}
+
+bool Table::operator!() {
+	if (this->entries.size() == 0)
+		return true;
+	else
+		return false;
 }
 
 ostream& operator<< (ostream& out, const Header& head) {
@@ -145,17 +221,66 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		return out;
 }
 
+istream& operator>>(istream& in, Table& tb) {						 //cin >> numeTabel => un nou entry in vectorul entries al clasei Table
+	int nrArgumente = tb.head.getNrColumns();
+	string* argumente = new string[nrArgumente];
+	for (int i = 0; i < nrArgumente; i++) {
+		cout << "\n" << tb.head.getTableHead()[i] << " : ";
+		getline(in, argumente[i]);
+	}
+	tb.addEntry(nrArgumente, argumente, tb);
+
+	delete[] argumente;
+	return in;
+}
+
+bool check_for_parenthesis_and_commas(string userInput)
+{
+	int openedParanthesis = 0;
+	//bool properCommasSyntax = true;
+
+	if (userInput[userInput.size() - 1] == ',') {
+		return false;
+	}
+
+	for (int i = 0; i < userInput.size(); i++) {
+		if (userInput[i] == '(') {
+			openedParanthesis++;
+		}
+		if (userInput[i] == ')') {
+			openedParanthesis--;
+		}
+
+		if (userInput[i] == ',') {
+			if (userInput[i + 1] != ' ') {							//had been checked in the first if condition of the function so it shouldn't reach out of bound values
+				return false;
+			}
+		}
+	}
+
+	if (openedParanthesis) {
+		return false;
+	}
+
+	return true;
+}
+
 string take_user_input_and_convert_lowercase()
 {
 	string userInput = "";
 	getline(cin, userInput);
-	for (int i = 0; i < userInput.size(); i++) {
-		if (userInput[i] >= 'A' && userInput[i] <= 'Z') {
-			userInput[i] += 32;										//value of 'a' - 'A'
+	//if (check_for_parenthesis_and_commas(userInput)) {
+		for (int i = 0; i < userInput.size(); i++) {
+			if (userInput[i] >= 'A' && userInput[i] <= 'Z') {
+				userInput[i] += 32;										//value of 'a' - 'A'
+			}
 		}
-	}
-	
-	
+	//}
+	/*else {
+		cout << "\nSintaxa gresita! Sintaxa corecta are virgule, dupa virgule spatii, iar toate parantezele deschise trebuie si inchise!\n";
+		userInput = "exit";
+	}*/
+
 	return userInput;
 }
 
@@ -168,7 +293,7 @@ string* split_string_into_words(string userInput)
 	word[0] = to_string(numberWords);								//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
 	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
 	for (i = 0; i < userInput.size(); i++) {
-		if (userInput[i] != ' ') {
+		if (userInput[i] != ' ' && userInput[i] != '(' && userInput[i] != ')' && userInput[i] != ',') {
 			startedTyping++;
 		}
 		if (startedTyping) {										//adica != 0
@@ -186,7 +311,7 @@ string* split_string_into_words(string userInput)
 					word[k] = aux[k];
 				}
 			}
-			while (userInput[i] != ' ' && i < userInput.size()) {
+			while (userInput[i] != ' ' && userInput[i] != '(' && userInput[i] != ')' && userInput[i] != ',' && i < userInput.size()) {
 				word[numberWords] += userInput[i++];				//cat timp nu avem space-uri, adugam literele la cuvantul numberWords pt a forma intregul argument cuvant[numberWords]
 			}
 			startedTyping = 0;										//s-a ajuns la space, astfel ca incetam tastarea/adugarea argumentului trecut si trecem mai departe
@@ -378,6 +503,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 
 string Table::getName() {
 	return this->name;
+}
+
+int Header::getNrColumns() {
+	return this->tableHead.size();
 }
 
 vector<string> Header::getTableHead()
