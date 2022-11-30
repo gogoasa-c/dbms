@@ -5,6 +5,36 @@ using namespace std;
 
 bool push_back_flag = false;
 
+Header::Header() {
+
+}
+
+Header::Header(string* word) {
+	if (word == nullptr) {
+		return;
+	}
+	int size = stoi(word[0]);
+	int i = 3; //incepe cu poz 3 unde sunt efectiv argumentele lui create table
+	i++;
+	while (i <= size) { //ia fiecare nume de coloana, dataType, dataSize, dataSize, implicitValue si le baga in vectorii aferenti
+		this->tableHead.push_back(word[i++]);
+		this->dataType.push_back(word[i++]);
+		this->dataSize.push_back(stoi(word[i++]));
+		this->implicitValue.push_back(word[i++]);
+	}
+}
+
+Header::Header(const Header& h) {
+	this->tableHead = h.tableHead;
+	this->dataType = h.dataType;
+	this->dataSize = h.dataSize;
+	this->implicitValue = h.implicitValue;
+}
+
+Header::~Header() {
+
+}
+
 Entry::Entry(const Entry& e) {
 	this->numberArguments = e.numberArguments;
 	this->arguments = new string[this->numberArguments];
@@ -41,28 +71,16 @@ Entry::~Entry() {
 
 Table::Table(const Table& t) {
 	this->name = t.name;
-	this->tableHead = t.tableHead;
-	this->dataType = t.dataType;
-	this->dataSize = t.dataSize;
-	this->implicitValue = t.implicitValue;
+	this->head = t.head;
 	this->entries = t.entries;
 }
 
-Table::Table() {
-
+Table::Table(): head(nullptr) {
+	this->name = "null";
 }
 
-Table::Table(string* word) { //pt coloanele tabelului/capul de tabel
-	int size = stoi(word[0]);
-	int i = 3; //incepe cu poz 3 unde sunt efectiv argumentele lui create table
-	this->name = word[i++]; //ia numele de pe poz 3 si creste i
-	while(i <= size) { //ia fiecare nume de coloana, dataType, dataSize, dataSize, implicitValue si le baga in vectorii aferenti
-		this->tableHead.push_back(word[i++]); 
-		this->dataType.push_back(word[i++]);
-		this->dataSize.push_back(stoi(word[i++]));
-		this->implicitValue.push_back(word[i++]);
-	}
-	
+Table::Table(string* word): head(word) { //pt coloanele tabelului/capul de tabel
+	this->name = word[3];
 }
 
 Table::~Table() {
@@ -85,6 +103,16 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 	}
 }
 
+ostream& operator<< (ostream& out, const Header& head) {
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << head.tableHead[i] << "|";
+		out << head.dataType[i] << "|";
+		out << head.dataSize[i] << "|";
+		out << head.implicitValue[i] << "\t";
+	}
+	return out;
+}
+
 ostream& operator<< (ostream& out, const Entry& ent) {
 	for (int i = 0; i < ent.numberArguments; i++) {
 		out << ent.arguments[i] << '\t';
@@ -99,13 +127,13 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << "+---------------Table--------------------+";
 		
 		out << endl;
-		
-		for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
-			out << tab.tableHead[i] << "/";
-			out << tab.dataType[i] << "/";
-			out << tab.dataSize[i] << "/";
-			out << tab.implicitValue[i] << "\t";
-		}
+		out << tab.head;
+		//for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
+		//	out << tab.tableHead[i] << "/";
+		//	out << tab.dataType[i] << "/";
+		//	out << tab.dataSize[i] << "/";
+		//	out << tab.implicitValue[i] << "\t";
+		//}
 		
 		out << endl;
 		out << "+-----------------------------------------+";
@@ -321,10 +349,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
-				for (int i = 5; i <= tables[position].tableHead.size(); i++) {
+				for (int i = 5; i <= tables[position].head.getTableHead().size(); i++) {
 
 				}
-				tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
+				tables[position].addEntry(tables[position].head.getTableHead().size(), word, tables[position]);
 				
 			}
 			else {
@@ -352,22 +380,22 @@ string Table::getName() {
 	return this->name;
 }
 
-vector<string> Table::getTableHead()
+vector<string> Header::getTableHead()
 {
 	return this->tableHead;
 }
 
-vector<string> Table::getDataType()
+vector<string> Header::getDataType()
 {
 	return this->dataType;
 }
 
-vector<int> Table::getDataSize()
+vector<int> Header::getDataSize()
 {
 	return this->dataSize;
 }
 
-vector<string> Table::getImplicitValue()
+vector<string> Header::getImplicitValue()
 {
 	return this->implicitValue;
 }
@@ -387,25 +415,25 @@ void Table::setName(string newName)
 	}
 }
 
-void Table::setTableHead(vector<string> newTableHead)
+void Header::setTableHead(vector<string> newTableHead)
 {
 	if(!newTableHead.empty())
 	this->tableHead = newTableHead;
 }
 
-void Table::setDataType(vector<string> newDataType)
+void Header::setDataType(vector<string> newDataType)
 {
 	if(!newDataType.empty())
 	this->dataType = newDataType;
 }
 
-void Table::setDataSize(vector<int> newDataSize)
+void Header::setDataSize(vector<int> newDataSize)
 {
 	if(!newDataSize.empty())
 	this->dataSize = newDataSize;
 }
 
-void Table::setImplicitValue(vector<string> newImplicitValue)
+void Header::setImplicitValue(vector<string> newImplicitValue)
 {
 	if(!newImplicitValue.empty())
 	this->implicitValue = newImplicitValue;

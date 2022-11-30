@@ -8,6 +8,32 @@
 #include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos
 using namespace std;
 
+class Header {
+	vector<string> tableHead;
+	vector<string> dataType;
+	vector<int> dataSize;
+	vector<string> implicitValue;
+public:
+	Header();
+	Header(string*);
+	Header(const Header&);
+
+	void setTableHead(vector<string> newTableHead);
+	void setDataType(vector<string> newDataType);
+	void setDataSize(vector<int> newDataSize);
+	void setImplicitValue(vector<string> newImplicitValue);
+
+	vector<string> getTableHead();
+	vector<string> getDataType();
+	vector<int> getDataSize();
+	vector<string> getImplicitValue();
+
+	friend ostream& operator <<(ostream&, const Header&);
+
+	~Header();
+
+};
+
 class Entry {//clasa entry care va constitui un vector<Entry> entries in clasa Table
 	int numberArguments;//numar argumente
 	string* arguments;//vector de string-uri alocat dinamic
@@ -36,15 +62,10 @@ public:
 };
 
 class Table {
-	string name;													//nume tabel
-	vector<string> tableHead;										//vector stl cu capetele de tabel; tableHead.push_back(nume_coloana_1)
-	vector<string> dataType;
-	vector<int> dataSize;
-	vector<string> implicitValue;
-	//vector<vector<string>> entries;									//matrice de string-uri unde stocam inregistrarile tabelului
+	string name;//nume tabel
+	Header head;
 	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
-	//fiecare linie din vector e aferenta unei inregistrari; entries[i] = inregistrarea i
-	//fiecare coloana are cate o valoare; entries[i][j] = tableHead[j]
+	
 public:
 	Table();
 	Table(string* word);
@@ -57,19 +78,13 @@ public:
 	// GET
 
 	string getName();
-	vector<string> getTableHead(); 
-	vector<string> getDataType();
-	vector<int> getDataSize();
-	vector<string> getImplicitValue();
+	
 	vector<Entry> getEntries();
 
 	// SET
 
 	void setName(string newName);
-	void setTableHead(vector<string> newTableHead);
-	void setDataType(vector<string> newDataType);
-	void setDataSize(vector<int> newDataSize);
-	void setImplicitValue(vector<string> newImplicitValue);
+	
 	void setEntries(vector<Entry> newEntries);
 
 	//----------------------------------------------------------------------
