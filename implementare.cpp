@@ -434,14 +434,26 @@ string* Entry::getArguments()
 
 void Entry::setNumberArguments(int newNumberArguments, string* newArguments)
 {
-	if (newNumberArguments > 0 && newArguments != nullptr)
-	{ 
-		delete[] this->arguments;
-		this->numberArguments = newNumberArguments;
-		this->arguments = new string[newNumberArguments];
-		for (int i = 0; i < newNumberArguments; i++)
+	try
+	{
+		if (stoi(arguments[0]) - 4 != numberArguments)
 		{
-			this->arguments[i] = newArguments[i];
+			exception e("\nNumar invalid de argumente!\n");
+			throw e;
 		}
+		if (newNumberArguments > 0 && newArguments != nullptr)
+		{
+			delete[] this->arguments;
+			this->numberArguments = newNumberArguments;
+			this->arguments = new string[newNumberArguments];
+			for (int i = 0; i < newNumberArguments; i++)
+			{
+				this->arguments[i] = newArguments[i];
+			}
+		}
+	}
+	catch (exception e) 
+	{
+		cout << e.what();
 	}
 }
