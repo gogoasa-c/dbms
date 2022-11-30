@@ -278,12 +278,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 	if (word[1] == "exit") {
 		return 0;
 	}
-	else if(word[1] != "exit") {
+	else {
 		if (!no_missing_arguments(word)) {
 			return 1;
 		}
-	}
-	else {
 		if (word[2] == "table") { //daca e vorba de o comanda ce implica table
 			if (word[1] == "create") { // vedem daca e create, daca da, facem un tabel nou in vectorul tables
 				bool exists = TableExists(word[3], tables);
@@ -323,6 +321,9 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
+				for (int i = 5; i <= tables[position].tableHead.size(); i++) {
+
+				}
 				tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
 				
 			}
