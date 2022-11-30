@@ -24,23 +24,12 @@ Entry::Entry(int newNumberArguments):numberArguments(newNumberArguments) {
 }
 
 Entry::Entry(int newNumberArguments, string* newArguments) {
-	try{
-		if ((stoi(newArguments[0]) - 4) != newNumberArguments) { //scad 4 ca sa nu numaram si primele 4 cuvinte din comanda: insert into table_name values 
-			exception e("\nNumar invalid de argumente!");
-			throw e;
-		}
-		this->numberArguments = newNumberArguments;
-		this->arguments = new string[numberArguments];
-		int j = 0;
-		for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
-			this->arguments[j] = newArguments[i];
-			++j;
-		}
-	}
-	catch (exception e) {
-		cout << e.what();
-		this->numberArguments = 0;
-		this->arguments = nullptr;
+	this->numberArguments = newNumberArguments;
+	this->arguments = new string[numberArguments];
+	int j = 0;
+	for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
+		this->arguments[j] = newArguments[i];
+		++j;
 	}
 }
 
@@ -81,10 +70,19 @@ Table::~Table() {
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
-	Entry* ent = new Entry(numberArguments, arguments);
-	push_back_flag = true;
-	table.entries.push_back(*ent);
-	push_back_flag = false;
+	try{
+		if (stoi(arguments[0]) - 4 != numberArguments) {
+			exception e("\nNumar invalid de argumente!\n");
+			throw e;
+		}
+		Entry* ent = new Entry(numberArguments, arguments);
+		push_back_flag = true;
+		table.entries.push_back(*ent);
+		push_back_flag = false;
+	}
+	catch (exception e) {
+		cout << e.what();
+	}
 }
 
 ostream& operator<< (ostream& out, const Entry& ent) {
@@ -112,12 +110,6 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		out << endl;
 		out << "+-----------------------------------------+";
 		out << endl;
-		/*for (int i = 0; i < tab.entries.size(); i++) {
-			out << i << ".\t";
-			for (int j = 0; j < tab.entries[i].size(); i++) {
-				out << tab.entries[i][j] << "\t";
-			}
-		}*/
 		for (int i = 0; i < tab.entries.size(); i++) {
 			out << tab.entries[i] << "\n";
 		}
@@ -198,6 +190,15 @@ bool TableExists(string word, vector<Table>& tables, int& position) {
 	return false;
 }
 
+bool isNumber(string s) {
+	for (int i = 0; i < s.length(); i++) {
+		if (isdigit(s[i]) == 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool no_missing_arguments(string* word) {
 	try{
 		if (stoi(word[0]) < 3 && word[1] != "exit") {
@@ -207,23 +208,52 @@ bool no_missing_arguments(string* word) {
 		}
 		else if (word[1] == "create") {
 			if (word[2] == "table") {
-				
+				int i = 5;
+				do {
+					if (word[i] != "text" && word[i] != "float" && word[i] != "int") {
+						exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
+						throw e;
+						return false;
+					}
+					i++;
+					if (!isNumber(word[i])) {
+						exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
+						throw e;
+						return false;
+					}
+					i += 3;
+				} while (i < stoi(word[0]));
+				return true;
 			}
-			else {
-				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2 ...");
+			else {// 5 6 9 10 13 14
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
 				throw e;
 				return false;
 			}
 		}
 		else if (word[1] == "drop") {
-
+			if (word[2] != "table" || stoi(word[0]) > 3) {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: drop table nume_tabel");
+				throw e;
+				return false;
+			}
 		}
 		else if (word[1] == "display") {
-
+			if (word[2] != "table" || stoi(word[0]) > 3) {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: display table nume_tabel");
+				throw e;
+				return false;
+			}
+			return true;
 		}
 		else if (word[1] == "insert") {
 			if (word[2] == "into") {
-				 
+				if (word[4] != "values") {
+					exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+					throw e;
+					return false;
+				}
+				return true;
 			}
 			else {
 				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
@@ -231,16 +261,27 @@ bool no_missing_arguments(string* word) {
 				return false;
 			}
 		}
+		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert") {
+			exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+			throw e;
+			return false;
+		}
 		return true;
 	}
 	catch (exception* e) {
-		cout << "\n" << e->what();
+		cout << "\n" << e->what() << "\n";
 	}
 }
 
 int identify_command_type(string* word, vector<Table>& tables) {
+	
 	if (word[1] == "exit") {
 		return 0;
+	}
+	else if(word[1] != "exit") {
+		if (!no_missing_arguments(word)) {
+			return 1;
+		}
 	}
 	else {
 		if (word[2] == "table") { //daca e vorba de o comanda ce implica table
@@ -282,9 +323,6 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
-				//Entry* ent = new Entry(tables[position].tableHead.size(), word); //nu stiu de ce nu merge help
-				//tables[position].entries.push_back(*ent); problema e cu push_back-ul asta
-				
 				tables[position].addEntry(tables[position].tableHead.size(), word, tables[position]);
 				
 			}

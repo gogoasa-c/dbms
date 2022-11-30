@@ -80,7 +80,8 @@ public:
 	~Table();
 };
 
-
+bool isNumber(string);
+bool no_missing_arguments(string*);
 string take_user_input_and_convert_lowercase();		//preia inputul decat de la tastatura (eventual va trebui modificata pt a prelua si din fisiere)
 													//si converteste tot string-ul la lowercase pt a nu conta CAPS/NO CAPS
 
