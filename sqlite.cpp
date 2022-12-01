@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
     vector<Table> tables;
-    cout << "Alpha v1.5.2 spre 6 dar nu prea\n";
+    cout << "Alpha v1.6\n";
     cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 
     while (true) {

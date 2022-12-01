@@ -251,7 +251,7 @@ bool check_for_parenthesis_and_commas(string userInput)
 			openedParanthesis--;
 		}
 
-		if (userInput[i] == ',') {
+		if (userInput[i] == ',' && i<userInput.size() - 1) { //added condition to check if i less than userInput.size() - 1 as to not overflow out of string size
 			if (userInput[i + 1] != ' ') {							//had been checked in the first if condition of the function so it shouldn't reach out of bound values
 				return false;
 			}
@@ -269,23 +269,26 @@ string take_user_input_and_convert_lowercase()
 {
 	string userInput = "";
 	getline(cin, userInput);
-	//if (check_for_parenthesis_and_commas(userInput)) {
+	if (check_for_parenthesis_and_commas(userInput)) {
 		for (int i = 0; i < userInput.size(); i++) {
 			if (userInput[i] >= 'A' && userInput[i] <= 'Z') {
 				userInput[i] += 32;										//value of 'a' - 'A'
 			}
 		}
-	//}
-	/*else {
+	}
+	else {
 		cout << "\nSintaxa gresita! Sintaxa corecta are virgule, dupa virgule spatii, iar toate parantezele deschise trebuie si inchise!\n";
-		userInput = "exit";
-	}*/
+		userInput = "invalid";
+	}
 
 	return userInput;
 }
 
 string* split_string_into_words(string userInput)
 {
+	if (userInput == "invalid") {
+		return nullptr;
+	}
 	int controlSize = 100;											//controlam size-ul array-ului de string alocat dinamic
 	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter ;; word[index] = ""
 	string* aux = NULL;
@@ -364,13 +367,13 @@ bool no_missing_arguments(string* word) {
 				int i = 5;
 				do {
 					if (word[i] != "text" && word[i] != "float" && word[i] != "int") {
-						exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
+						exception* e = new exception("\n\nSintaxa gresita! Sintaxa corecta: create table table_name ((column1, c1_data_type, c1_size, c1_default_value,) (column2, c2_data_type, c2_size...), ...)\n");
 						throw e;
 						return false;
 					}
 					i++;
 					if (!isNumber(word[i])) {
-						exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
+						exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name ((column1, c1_data_type, c1_size, c1_default_value,) (column2, c2_data_type, c2_size...), ...)\n");
 						throw e;
 						return false;
 					}
@@ -379,7 +382,7 @@ bool no_missing_arguments(string* word) {
 				return true;
 			}
 			else {// 5 6 9 10 13 14
-				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name column1 c1_data_type c1_size c1_default_value column2  c2_data_type c2_size...");
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: create table table_name ((column1, c1_data_type, c1_size, c1_default_value,) (column2, c2_data_type, c2_size...), ...)\n");
 				throw e;
 				return false;
 			}
@@ -402,20 +405,20 @@ bool no_missing_arguments(string* word) {
 		else if (word[1] == "insert") {
 			if (word[2] == "into") {
 				if (word[4] != "values") {
-					exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+					exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values (c1_data, c2_data ...)");
 					throw e;
 					return false;
 				}
 				return true;
 			}
 			else {
-				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values (c1_data, c2_data...)");
 				throw e;
 				return false;
 			}
 		}
 		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert") {
-			exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values c1_data c2_data ...");
+			exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values (c1_data, c2_data ...)\n");
 			throw e;
 			return false;
 		}
@@ -427,7 +430,9 @@ bool no_missing_arguments(string* word) {
 }
 
 int identify_command_type(string* word, vector<Table>& tables) {
-	
+	if (word == nullptr) {
+		return 1;
+	}
 	if (word[1] == "exit") {
 		return 0;
 	}
