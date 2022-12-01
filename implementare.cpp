@@ -475,6 +475,7 @@ bool no_missing_arguments(string* word) {
 			}
 		}
 		else if (word[1] == "select") {
+			//nu prea avem cum face check aici pe select. trebuie sa vedem numele de coloane mai jos in identify_command_type()
 			return true;
 		}
 		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert") {
@@ -565,6 +566,7 @@ int identify_command_type(string* word, vector<Table>& tables) {
 						}
 						else {
 							cout << "\nColoana nu exista!\n";
+							return 1;
 						}
 					} // daca nu e cu where ii dam direct print
 					else {
@@ -573,7 +575,68 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				}
 				else {
 					cout << "\nTabel inexistent\n";
+					return 1;
 				}
+			}
+			else { //mergem si vedem despre ce tabel e vorba
+				int i = 1, fromPosition = -1; // stim ca numele tabelului se afla dupa fix dupa from
+				while (i < stoi(word[0])) {
+					if (word[i] == "from") {
+						fromPosition = i; //am gasit from-ul deci e ok. gata
+						break;
+					}
+					++i;
+				}
+				if (fromPosition == -1) { // daca nu l-am gasit, e problema de sintaxa
+					cout << "\nSintaxa gresita! Sintaxa corecta: select coloana1, coloana2, coloana3, ... from nume_tabel [where coloana = valoare]\n";
+					return 1;
+				}
+				//ok hai sa cautam tabelul
+				int tablePosition = -1; // incepem cu poz -1 ca mai sus la insert
+				bool exists = TableExists(word[fromPosition+1], tables, tablePosition); // gasim tabelul din care afisam
+				if (exists) { // daca exista tabelul sa vedem daca coloanele sunt in el :D
+					vector<string> tabHeads = tables[tablePosition].head.getTableHead(); // copiem capul de tabel cu numele doar
+					vector<int> columnPositions; // aici tinem pozitiile coloanelor cand le gasim
+					for (int i = 2; i < fromPosition; i++) { // vedem despre ce coloane e vorba
+						int colPosition = -1;
+						bool colExists = columnExists(word[i], tabHeads, colPosition); // verificam daca exista coloana
+						if (colExists) { // exista coloana? super
+							columnPositions.push_back(colPosition); // bagam pozitia ei in columnPositions
+						}
+						else {
+							cout << "\nColoana inexistenta!\n"; // nu exista? nasol
+							return 1; // nu mai facem nimic
+						}
+					}
+					cout << endl;
+					for (int i = 0; i < columnPositions.size(); i++) { // aici vreau sa afisez capetele de tabel (doar numele lor)
+						ios init(NULL); // dar nu stiu de ce nu merge sa-mi afiseze ce trebuie. nu am timp sa figure it out myself. daca puteti sa debug voi ar fi gr8
+						init.copyfmt(cout);
+						cout << setw(15);
+						cout << tables[tablePosition].head.getTableHead()[i] << "\t";
+						cout.copyfmt(init);
+					}
+					cout << endl << endl;
+					for(int j = 0; j<tables[tablePosition].entries.size(); j++){ // pentru fiecare entry
+						for (int i = 0; i < columnPositions.size(); i++) { // aici trecem prin vectorul cu pozitiile coloanelor si afisam coloanele
+							ios init(NULL);
+							init.copyfmt(cout);
+							cout << setw(15);
+							cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
+							cout.copyfmt(init);
+
+						} // tables[tablePositions] = tabelul curent
+						//.entries = intram in vectorul entries
+						//[j] ca luam al j-lea entry ca facem for-ul exterior de cu j pe vectorul de entries
+						// .getArguments() = .arguments[columnPositions[i]] pentru ca pozitiile coloanelor sunt actually in columnPositions
+						cout << endl;
+					}
+				}
+				else {
+					cout << "\nTabel inexistent!\n";
+					return 1;
+				}
+				
 			}
 		}
 		//if (word[1] == "select") return 2;
