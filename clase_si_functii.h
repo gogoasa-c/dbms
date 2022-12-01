@@ -124,7 +124,8 @@ string* split_string_into_words(string);			//imparte string-ul initial in vector
 													//cuvant/argument introdus de la tastatura
 													//vom putea refolosi functia si pt a pasa la clase cuvant cu cuvant stringul si a asigna corespunzator
 													//membrilor valorile din argumente
-
+bool columnExists(string, vector<string>); // verifica daca coloana exista in header-ul unui tabel anume
+bool columnExists(string, vector<string>, int&); // verifica daca coloana exista in header-ul unui tabel anume si intoarce pozitia pe care se afla coloana daca exista
 bool TableExists(string, vector<Table>&);//verifica daca tabelul exista in vectorul de tabele
 bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista in vectorul de tabele si in int& modifica pozitia pe care l-a gasit
 

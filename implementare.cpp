@@ -99,6 +99,16 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 			exception e("\nNumar invalid de argumente!\n");
 			throw e;
 		}
+		
+		int j = 0; // am adaugat asta ca sa verificam ca argumentele pasate se afla in limite (compar efectiv lungimea sirului din arguments cu maxSize-ul argumentului si anume table.head.getDataSize()[j]
+		for(int i=5; i<=stoi(arguments[0]); i++){
+			if(arguments[i].size() > table.head.getDataSize()[j]){
+				exception e("\nValoarea introdusa intrece limitele coloanei!\n");
+				throw e;
+			}
+			++j;
+		}
+		//abia daca trec de check fac un entry nou pe care il pushez
 		Entry* ent = new Entry(numberArguments, arguments);
 		push_back_flag = true;
 		table.entries.push_back(*ent);
@@ -125,7 +135,7 @@ bool Entry::operator==(const Entry& ent) {
 
 Entry& Table::operator[](int index) {
 	try {
-		if (index < 0 && index >= this->entries.size()) {
+		if (index < 0 || index >= this->entries.size()) { //e cu || conditia ca nu poate sa fie si mai mic decat 0 index si mai mare decat marimea entry-urilor care e numar pozitiv
 			exception e("\nIndex invalid!\n");
 			throw e;
 		}
@@ -134,7 +144,8 @@ Entry& Table::operator[](int index) {
 	}
 	catch (exception e) {
 		cout << e.what();
-
+		Entry ent(0, nullptr); // cred ca asta voiati sa faceti
+		return ent;
 		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!! (cumva undeva in afara functiei, in mod evident, dar Vali nu stie cum. PS: nici teol; bafta cristi!)
 		
 		/*Entry* ent = new Entry(0, NULL);
@@ -180,29 +191,54 @@ bool Table::operator!() {
 }
 
 ostream& operator<< (ostream& out, const Header& head) {
+	out << endl;
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << "++++++++++++++++++++++";
+	}
+	out << endl;
 	for (int i = 0; i < head.tableHead.size(); i++) {
 		out << head.tableHead[i] << "|";
 		out << head.dataType[i] << "|";
 		out << head.dataSize[i] << "|";
 		out << head.implicitValue[i] << "\t";
 	}
-	return out;
-}
-
-ostream& operator<< (ostream& out, const Entry& ent) {
-	for (int i = 0; i < ent.numberArguments; i++) {
-		out << ent.arguments[i] << '\t';
+	out << endl;
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << "++++++++++++++++++++++";
 	}
 	return out;
 }
 
+ostream& operator<< (ostream& out, const Entry& ent) {
+	ios init(NULL);
+	init.copyfmt(out);
+	out << setw(15);
+
+	for (int i = 0; i < ent.numberArguments; i++) {
+		out << ent.arguments[i] << "\t\t";
+	}
+
+	cout.copyfmt(init);
+	return out;
+}
+
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
+		Header h = tab.head;
 		out << endl;
-		out << "\n                    " << tab.name << "                    ";
-		out << endl;
-		out << "+---------------Table--------------------+";
 		
-		out << endl;
+		for (int i = 0; i < h.getTableHead().size()/2; i++) {
+			out << '\t' << '\t';
+		}
+		out << tab.name;
+		for (int i = h.getTableHead().size()/2; i < h.getTableHead().size(); i++) {
+			out << '\t' << '\t';
+		}
+		/*out << endl;
+		
+		for (int i = 0; i < h.getTableHead().size(); i++) {
+			out << "++++++++++++++++++++++";
+		}*/
+		//out << endl;
 		out << tab.head;
 		//for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
 		//	out << tab.tableHead[i] << "/";
@@ -211,8 +247,10 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		//	out << tab.implicitValue[i] << "\t";
 		//}
 		
-		out << endl;
-		out << "+-----------------------------------------+";
+		//out << endl;
+		/*for (int i = 0; i < h.getTableHead().size(); i++) {
+			out << "++++++++++++++++++++++";
+		}*/
 		out << endl;
 		for (int i = 0; i < tab.entries.size(); i++) {
 			out << tab.entries[i] << "\n";
@@ -328,6 +366,25 @@ string* split_string_into_words(string userInput)
 	return word;
 }
 
+bool columnExists(string col, vector<string> columns) {
+	for (int i = 0; i < columns.size(); i++) {
+		if (col == columns[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool columnExists(string col, vector<string> columns, int& position) {
+	for (int i = 0; i < columns.size(); i++) {
+		if (col == columns[i]) {
+			position = i;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool TableExists(string word, vector<Table>& tables) {
 	for (int i = 0; i < tables.size(); i++) {
 		if (word == tables[i].getName()) {
@@ -417,11 +474,15 @@ bool no_missing_arguments(string* word) {
 				return false;
 			}
 		}
+		else if (word[1] == "select") {
+			return true;
+		}
 		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert") {
-			exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: insert into table_name values (c1_data, c2_data ...)\n");
+			exception* e = new exception("\nComanda inexistenta!\n");
 			throw e;
 			return false;
 		}
+		//trebuie adaugat un check pt select :D
 		return true;
 	}
 	catch (exception* e) {
@@ -474,22 +535,47 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				}
 			}
 		}
-		//if (word[2] == "index") return 999;							//optional conform cerintei
-		if (word[1] == "insert") {
+		else if (word[1] == "insert") {//if (word[2] == "index") return 999;							//optional conform cerintei
 			int position = -1;
 			bool exists = TableExists(word[3], tables, position);
 			if(exists) {
-				for (int i = 5; i <= tables[position].head.getTableHead().size(); i++) {
-
-				}
 				tables[position].addEntry(tables[position].head.getTableHead().size(), word, tables[position]);
 				
 			}
 			else {
-			
+				cout << "\nTabel inexistent\n";
 			}
 		}
-
+		else if (word[1] == "select") { // select (coloana1, coloana2, coloana3, ...) from tabel where nume_coloana = valoare
+			if (word[2] == "all") { // select all from tabel [where nume_coloana = valoare]
+				int position = -1; // incepem cu poz -1 ca mai sus la insert
+				bool exists = TableExists(word[4], tables, position); // gasim tabelul din care afisam
+				if (exists) {
+					if (word[5] == "where") { // vedem daca e cu where sau nu
+						vector<string> tabHeads = tables[position].head.getTableHead(); // copiem capul de tabel cu numele doar
+						int colPosition = -1;
+						bool colExists = columnExists(word[6], tabHeads, colPosition); // verificam daca exista coloana
+						if (colExists) { // daca exista 
+							cout << tables[position].head; // dam output la capul de tabel
+							for (int i = 0; i < tables[position].getEntries().size(); i++) { // si dupa cautam sa dam match intre valoare de pe coloana respectiva si valoarea introdusa de la tastatura
+								if (tables[position].getEntries()[i].getArguments()[colPosition] == word[8]) {
+									cout << endl << tables[position].getEntries()[i]; // cand o gasim, cout
+								}
+							}
+						}
+						else {
+							cout << "\nColoana nu exista!\n";
+						}
+					} // daca nu e cu where ii dam direct print
+					else {
+						cout << tables[position];
+					}
+				}
+				else {
+					cout << "\nTabel inexistent\n";
+				}
+			}
+		}
 		//if (word[1] == "select") return 2;
 		//if (word[1] == "update") return 3;
 		//if (word[1] == "delete") return 4;
