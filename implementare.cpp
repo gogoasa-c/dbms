@@ -587,6 +587,17 @@ int identify_command_type(string* word, vector<Table>& tables) {
 					}
 					++i;
 				}
+				i = 1;
+				int wherePosition = -1;
+				while (i < stoi(word[0])) {
+					if (word[i] == "where") {
+						wherePosition = i;
+						break;
+					}
+					++i;
+				}
+				
+				// select (coloana1, coloana2, coloana3, ...) from tabel where nume_coloana = valoare
 				if (fromPosition == -1) { // daca nu l-am gasit, e problema de sintaxa
 					cout << "\nSintaxa gresita! Sintaxa corecta: select coloana1, coloana2, coloana3, ... from nume_tabel [where coloana = valoare]\n";
 					return 1;
@@ -609,27 +620,63 @@ int identify_command_type(string* word, vector<Table>& tables) {
 						}
 					}
 					cout << endl;
+					for(int i=0; i<columnPositions.size(); i++){
+						cout << "++++++++++++++++++++++";
+					}
+					cout << endl;
 					for (int i = 0; i < columnPositions.size(); i++) { // aici vreau sa afisez capetele de tabel (doar numele lor)
 						ios init(NULL); // dar nu stiu de ce nu merge sa-mi afiseze ce trebuie. nu am timp sa figure it out myself. daca puteti sa debug voi ar fi gr8
 						init.copyfmt(cout);
 						cout << setw(15);
-						cout << tables[tablePosition].head.getTableHead()[i] << "\t";
+						cout << tables[tablePosition].head.getTableHead()[columnPositions[i]] << "\t\t";
 						cout.copyfmt(init);
+					
 					}
-					cout << endl << endl;
-					for(int j = 0; j<tables[tablePosition].entries.size(); j++){ // pentru fiecare entry
-						for (int i = 0; i < columnPositions.size(); i++) { // aici trecem prin vectorul cu pozitiile coloanelor si afisam coloanele
-							ios init(NULL);
-							init.copyfmt(cout);
-							cout << setw(15);
-							cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
-							cout.copyfmt(init);
+					cout << endl;
+					for (int i = 0; i < columnPositions.size(); i++) {
+						cout << "++++++++++++++++++++++"; // afisaj frumos
+					}
+					cout << endl;
+					if(wherePosition == -1){
+						for (int j = 0; j < tables[tablePosition].entries.size(); j++) { // pentru fiecare entry
+							for (int i = 0; i < columnPositions.size(); i++) { // aici trecem prin vectorul cu pozitiile coloanelor si afisam coloanele
+								ios init(NULL);
+								init.copyfmt(cout);
+								cout << setw(15);
+								cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
+								cout.copyfmt(init);
 
-						} // tables[tablePositions] = tabelul curent
-						//.entries = intram in vectorul entries
-						//[j] ca luam al j-lea entry ca facem for-ul exterior de cu j pe vectorul de entries
-						// .getArguments() = .arguments[columnPositions[i]] pentru ca pozitiile coloanelor sunt actually in columnPositions
-						cout << endl;
+							} // tables[tablePositions] = tabelul curent
+							//.entries = intram in vectorul entries
+							//[j] ca luam al j-lea entry ca facem for-ul exterior cu j pe vectorul de entries
+							// .getArguments() = .arguments[columnPositions[i]] pentru ca pozitiile coloanelor sunt actually in columnPositions
+							cout << endl;
+						}
+					}
+					else {
+						int restrictionColumnPos = -1;
+						bool restrictionExists = columnExists(word[wherePosition + 1], tables[tablePosition].head.getTableHead(), restrictionColumnPos);
+						if (!restrictionExists) { // mergem si cautam coloana in functie de care facem check-ul pe where, daca nu exista return
+							cout << "\nColoana restrictie inexistenta!\n"; 
+							return 1;
+						}//in schimb, daca exista, mergem cu 2 for-uri nested ca mai sus si afisam doar ce se potriveste cu restriction-ul
+						for (int j = 0; j < tables[tablePosition].entries.size(); j++) { // pentru fiecare entry
+							bool afisat = false;
+							for (int i = 0; i < columnPositions.size(); i++) { // aici trecem prin vectorul cu pozitiile coloanelor si afisam coloanele
+								if(tables[tablePosition].entries[j].getArguments()[restrictionColumnPos] == word[wherePosition + 3]) {
+									ios init(NULL);
+									init.copyfmt(cout);
+									cout << setw(15);
+									cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
+									cout.copyfmt(init);
+									afisat = true;
+								}
+
+							}
+							if(afisat){
+								cout << endl;
+							}
+						}
 					}
 				}
 				else {
