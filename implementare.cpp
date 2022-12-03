@@ -774,7 +774,7 @@ int identify_command_type(string* word, vector<Table>& tables) {
 								int numberArguments = tables[pozTable].entries[i].getNumberArguments();			//numarul de argumente al entry-ului i
 								string* newArguments = new string[numberArguments];
 								for (int j = 0; j < numberArguments; j++) {
-									newArguments[j] = tables[pozTable].entries[i].getArguments()[j];			//******AICI EROARE!!! //egalam newArguments cu argumentele vechi mai intai
+									newArguments[j] = tables[pozTable].entries[i].getArguments()[j];			//egalam newArguments cu argumentele vechi mai intai
 								}
 								
 								newArguments[pozColumn1] = setValue;											//pozitia in newArguments pe care vrem sa o modificam ia valoarea pe care vrem s-o setam
