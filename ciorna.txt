@@ -1,0 +1,13 @@
+create table t nume text 10 0 salariu int 6 0
+insert into t values Adrian, 1000
+insert into t values Adrian, 2000
+insert into t values Marian, 3000
+insert into t values Jigdsfg, 3000
+insert into t values dsadsad, 3000
+insert into t values Cristian, 4000
+insert into t values Dian, 5000
+display table t
+
+delete from t where nume = adrian
+
+update t set salariu = 9999 where nume = adrian
