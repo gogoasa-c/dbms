@@ -57,7 +57,7 @@ public:
 
 	// SET
 
-	void setNumberArguments(int newNumberArguments, string* newArguments);
+	void setArguments(int newNumberArguments, string* newArguments);
 
 	//----------------------------------------------------------------------
 
@@ -94,6 +94,8 @@ public:
 	string getName();
 
 	vector<Entry> getEntries();
+
+	vector<Entry>& getRefEntries();
 
 	// SET
 

@@ -3,13 +3,13 @@
 
 #include "clase_si_functii.h"
 #include <iostream>
-#include <string>
+
 using namespace std;
 
 int main()
 {
     vector<Table> tables;
-    cout << "Alpha v1.6\n";
+    cout << "Beta v0.9\n";
     cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 
     while (true) {
@@ -18,7 +18,24 @@ int main()
         if (aux == 0)
             break;//FUNCTIONEAZA
     }
-   
+    
+    /*TO DO LIST (PT PERFECTIONARE / LUSTRUIRE)
+    * 
+    * -1) Argumentele noastre sunt toate de tip string si desi ar trebui sa aiba tip de text/int/ etc ele pot fi totusi introduse aiurea. (ex: coloana de tip int poate prin insert sa aiba in entry la coloana de tip int valoarea abcdefg)
+    * 
+    * 0) DELETE-ul m-a infrant. im sorry. SOS
+    * 
+    * 1) Daca tipul de coloana introdus in comanda create table este int, inregistrarea accepta in continuare litere text pe care le introuce prin insert into nume_tabel values ...
+    *     
+    * 2) insert into nu permite inserarea decat a unui singur entry la un moment dat. probabil ca ar trebui sa permita introucerea a multiple entry-uri daca e cazul.
+    * 
+    * 3) de adaugat membru constant si static (ex: constant poate fi un index; static poate fi numarul tabelei)
+    * 
+    * 4) de adaugat celelalte supraincarcari de operatori necesari din cerinta proiectului (minim un operator matematic (+,-,* sau /) ;; ++ sau -- (cu cele 2 forme) ;; operatorul cast (catre orice tip) explicit sau implicit)
+    * 
+    */
+
+    
     
     /* string currInput = "create table t id number 100 -1 nume varchar2 255 null";
     string* currInputWords = new string[100];
@@ -31,33 +48,8 @@ int main()
     currInput = "display table t";
     currInputWords = split_string_into_words(currInput);
     identify_command_type(currInputWords, tables);*/
-    
 
-    /*TO DO LIST
-    * 
-    * 1) Functia "take_user_input_and_convert_lowercase()" se foloseste de functia "check_for_parenthesis_and_commas(string)" pentru a afisa mesaj de eroare daca sunt paranteze
-    * puse aiurea, insa nu stiu cum sa o fac sa nu iasa cu totul din executia programului main, ci doar sa ignore stringul eronat si sa astepte o noua comanda corespunzatoare,
-    * astfel ca am comentat parte din cod la functia "take_user_input_and_convert_lowercase()"
-    * 
-    * 2) Am "implementat" operatorul [], insa daca indexul este invalid, ar trebui sa returnam in continuare o referinta la clasa Entry, insa! problema este ca noi nu am implementat inca 
-    * comanda "delete from", rezultand in inabilitatea de a sterge inregistrarea eronata din nume_tabel.entries[index_handicapat].
-    * 
-    * 3) DE TESTAT: implementarea operatorilor :
-    *       - operatorii   >   <   >=   <=
-    *       - operator      ==
-    *       - operator      !
-    *       - operator      []
-    *       - operator      >>              //ex:   cin >> nume_tabel       (   istream& operator>>(istream& in, Table& tb)   )          
-    * 
-    * 
-    * 
-    *   NOTE IMPORTANTE DE CITIT:
-    * 
-    * 1) supraincarcarea operatorului >> pentru citire de entry noua in obiect de tip Table ar putea fi utilizat la implementarea comenzii UPDATE nume_tabela SET nume_coloana ...
-    * 
-    * 
-    * 
-    */
+
 
     return 0;
 }

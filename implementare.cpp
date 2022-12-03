@@ -478,12 +478,44 @@ bool no_missing_arguments(string* word) {
 			//nu prea avem cum face check aici pe select. trebuie sa vedem numele de coloane mai jos in identify_command_type()
 			return true;
 		}
-		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert") {
+		else if (word[1] == "delete") {
+			if (stoi(word[0]) != 7) {
+				exception* e = new exception("\nNumar gresit de argumente. Comanda are sintaxa:   delete from nume_tabela where nume_coloana = valoare    si primeste 7 argumente!\n");
+				throw e;
+				return false;
+			}
+			if (word[2] == "from") {
+				if (word[4] != "where" || word[6] != "=") {
+					exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: delete from nume_tabela where nume_coloana = valoare");
+					throw e;
+					return false;
+				}
+			}
+			else {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: delete from nume_tabela where nume_coloana = valoare");
+				throw e;
+				return false;
+			}
+		}
+		else if (word[1] == "update") {
+			if (stoi(word[0]) != 10) {
+				exception* e = new exception("\nNumar gresit de argumente. Comanda are sintaxa:   UPDATE nume_tabela SET nume_coloana = valoare WHERE nume_coloana = valoare    si primeste 10 argumente!\n");
+				throw e;
+				return false;
+			}
+			if (word[3] != "set" || word[5] != "=" || word[7] != "where" || word[9] != "=") {
+				exception* e = new exception("\nSintaxa gresita! Sintaxa corecta: UPDATE nume_tabela SET nume_coloana = valoare WHERE nume_coloana = valoare\n");
+				throw e;
+				return false;
+			}
+		}
+		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert" && word[1] != "delete" && word[1] != "update") {
 			exception* e = new exception("\nComanda inexistenta!\n");
 			throw e;
 			return false;
 		}
 		//trebuie adaugat un check pt select :D
+		
 		return true;
 	}
 	catch (exception* e) {
@@ -686,6 +718,87 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				
 			}
 		}
+		else if (word[1] == "delete") {															 // DELETE FROM nume_tabela WHERE nume_coloana = valoare (DELETE permite doar o coloana în clauza WHERE)
+			string tableName = word[3];															 // numele tabelei din care urmeaza sa stergem inregistrari
+			int pozTable = -1;																	 // pozitia tabelei in vectorul de tabele (-1 daca nu exista)
+			if (TableExists(tableName, tables, pozTable)) {						   				 // functie care verifica existenta tabelei in vectorul de tabele si modifica prin referinta pozitia tabelei in caz ca tabela exista 
+				string columnName = word[5];									 				 // numele coloanei pe care o egalam cu o valoare anume, iar inregistrarile care au pe coloana columnName valoare precizata vor fi sterse
+				int pozColumn = -1;															     // pozitia coloanei pt care cautam inregistrari ce urmeaza a fi sterse
+				if (columnExists(columnName, tables[pozTable].head.getTableHead(), pozColumn)) { // abominatia asta: tables[pozTable].head.getTableHead() inseamna ca in vectorul de tabele tables, ne ducem la tabela pe care o dorim a 
+																								 // carei pozitie este pozTable, apoi ne ducem la membrul head, iar apoi la metoda getTableHead() care returneaza vector<string>
+					string searchedValue = word[7];												 // stringul corespunzator lui "valoare" din sintaxa este word[7]
+
+
+					//	Aceasta parte de mai jos functioneaza decat daca avem un singur entry in toata tabela caruia ii dam delete. altfel da eroare abort()
+					//	Tot ce am gasit pe net sunt probleme in care codul foloseaza copy si nu referinte astfel ca nu iesea bine din nush ce motive
+					//	Insa nu pare sa fie acelasi caz aici, pare ca lucram pe obiectul in sine, nu copiat, si pe el facem modificari, cu toate astea nu merge
+					//	Am incercat multe chestii, care mai de care din ce in ce mai ciudate si fara sens. Deocamdata nu mai am nicio idee :(
+					//  Incercand sa scriu coul in alte metode reuseam sa mai primesc si eroarea "vector erase iterator outside range"
+					// 
+					auto beginEntry = tables[pozTable].getRefEntries().begin();
+					auto endEntry = tables[pozTable].getRefEntries().end();
+					for (int i = 0; i < tables[pozTable].getRefEntries().size(); i++) {			 // tables[pozTable].getEntries() este vector<Entry> entries din tabela cu poz pozTable din tables
+						if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] == searchedValue) { // verificam daca pe coloana cu indexul pozColumn al entry-ului i valoarea este egala cu valoarea cautata
+							if (((beginEntry + i) != endEntry) && (beginEntry != endEntry)) {
+
+								tables[pozTable].getRefEntries().erase(beginEntry + i);		   //******PARE CA LA RANDUL ASTA SE INTAMPLA NENOROCIREA*******
+
+								i--;
+							}
+						}
+					}
+				}
+				else {
+					cout << "\nColoana inexistenta!\n";
+				}
+			}
+			else {
+				cout << "\nTabel inexistent!\n";
+			}
+		}
+		else if (word[1] == "update") {																//UPDATE nume_tabela SET nume_coloana = valoare WHERE nume_coloana = valoare (coloana SET poate fi diferita de cea WHERE; UPDATE merge doar pentru o coloana)
+			string tableName = word[2];
+			int pozTable = -1;																	 
+			if (TableExists(tableName, tables, pozTable)) {
+				string columnName1 = word[4];
+				int pozColumn1 = -1;
+				if (columnExists(columnName1, tables[pozTable].head.getTableHead(), pozColumn1)) {
+					string setValue = word[6];
+					string lookForValue = word[10];
+					string columnName2 = word[8];
+					int pozColumn2 = -1;
+					if (columnExists(columnName2, tables[pozTable].head.getTableHead(), pozColumn2)) {
+						for (int i = 0; i < tables[pozTable].getEntries().size(); i++) {						//trecem prin fiecare entry al tabelei pe rand
+							if (tables[pozTable].getEntries()[i].getArguments()[pozColumn2] == lookForValue) {  //daca entry-ul i are argumentul[pozColumn2] = valoarea dupa care setam
+
+								int numberArguments = tables[pozTable].entries[i].getNumberArguments();			//numarul de argumente al entry-ului i
+								string* newArguments = new string[numberArguments];
+								for (int j = 0; j < numberArguments; j++) {
+									newArguments[j] = tables[pozTable].entries[i].getArguments()[j];			//******AICI EROARE!!! //egalam newArguments cu argumentele vechi mai intai
+								}
+								
+								newArguments[pozColumn1] = setValue;											//pozitia in newArguments pe care vrem sa o modificam ia valoarea pe care vrem s-o setam
+
+								tables[pozTable].entries[i].setArguments(numberArguments, newArguments);
+								
+								delete[] newArguments;
+							}
+						}
+					}
+					else {
+						cout << "\nColoana " << columnName2 << " nu exista!" << "\n";
+					}
+				}
+				else {
+					cout << "\nColoana " << columnName1 << " nu exista!" << "\n";
+				}
+			}
+			else {
+				cout << "\nTabel inexistent!\n";
+			}
+		}
+
+
 		//if (word[1] == "select") return 2;
 		//if (word[1] == "update") return 3;
 		//if (word[1] == "delete") return 4;
@@ -731,6 +844,11 @@ vector<string> Header::getImplicitValue()
 }
 
 vector<Entry> Table::getEntries()
+{
+	return this->entries;
+}
+
+vector<Entry>& Table::getRefEntries()
 {
 	return this->entries;
 }
@@ -791,11 +909,11 @@ string* Entry::getArguments()
 
 // SET for Entry class
 
-void Entry::setNumberArguments(int newNumberArguments, string* newArguments)
+void Entry::setArguments(int newNumberArguments, string* newArguments)
 {
 	try
 	{
-		if (stoi(arguments[0]) - 4 != numberArguments)
+		if (newNumberArguments != this->numberArguments)
 		{
 			exception e("\nNumar invalid de argumente!\n");
 			throw e;
