@@ -47,7 +47,7 @@ public:
 	Entry(const Entry&);
 
 	bool operator==(const Entry&);
-
+	void operator=(const Entry&);
 	//----------------------------------------------------------------------
 
 	// GET
@@ -77,7 +77,7 @@ public:
 	Table(const Table&);
 
 	Entry& operator[](int);						//create table t; t[0] => t.entries[0]; word[2] = numetabel; word[2][0] => t.entries[0]
-
+	
 	bool operator>(const Table&);
 	bool operator>=(const Table&);
 	bool operator<(const Table&);

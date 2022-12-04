@@ -69,6 +69,24 @@ Entry::Entry(int newNumberArguments, string* newArguments) {
 	}
 }
 
+void Entry::operator=(const Entry& e) {
+	try{
+		if (e.numberArguments < 0 || e.arguments == nullptr) {
+			exception e("\nEntry invalid operator=!\n");
+			throw e;
+		}
+		this->numberArguments = e.numberArguments;
+		this->arguments = new string[this->numberArguments];
+		for (int i = 0; i < this->numberArguments; i++) {
+			this->arguments[i] = e.arguments[i];
+		}
+	}
+	catch (exception e) {
+		cout << e.what();
+	}
+
+}
+
 Entry::~Entry() {
 	if (this->arguments != nullptr ) {
 		delete[] this->arguments;
@@ -727,26 +745,34 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				if (columnExists(columnName, tables[pozTable].head.getTableHead(), pozColumn)) { // abominatia asta: tables[pozTable].head.getTableHead() inseamna ca in vectorul de tabele tables, ne ducem la tabela pe care o dorim a 
 																								 // carei pozitie este pozTable, apoi ne ducem la membrul head, iar apoi la metoda getTableHead() care returneaza vector<string>
 					string searchedValue = word[7];												 // stringul corespunzator lui "valoare" din sintaxa este word[7]
+					
 
+					////	Aceasta parte de mai jos functioneaza decat daca avem un singur entry in toata tabela caruia ii dam delete. altfel da eroare abort()
+					////	Tot ce am gasit pe net sunt probleme in care codul foloseaza copy si nu referinte astfel ca nu iesea bine din nush ce motive
+					////	Insa nu pare sa fie acelasi caz aici, pare ca lucram pe obiectul in sine, nu copiat, si pe el facem modificari, cu toate astea nu merge
+					////	Am incercat multe chestii, care mai de care din ce in ce mai ciudate si fara sens. Deocamdata nu mai am nicio idee :(
+					////  Incercand sa scriu coul in alte metode reuseam sa mai primesc si eroarea "vector erase iterator outside range"
+					//// 
+					//auto beginEntry = tables[pozTable].getRefEntries().begin();
+					//auto endEntry = tables[pozTable].getRefEntries().end();
+					//for (int i = 0; i < tables[pozTable].getRefEntries().size(); i++) {			 // tables[pozTable].getEntries() este vector<Entry> entries din tabela cu poz pozTable din tables
+					//	if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] == searchedValue) { // verificam daca pe coloana cu indexul pozColumn al entry-ului i valoarea este egala cu valoarea cautata
+					//		if (((beginEntry + i) != endEntry) && (beginEntry != endEntry)) {
 
-					//	Aceasta parte de mai jos functioneaza decat daca avem un singur entry in toata tabela caruia ii dam delete. altfel da eroare abort()
-					//	Tot ce am gasit pe net sunt probleme in care codul foloseaza copy si nu referinte astfel ca nu iesea bine din nush ce motive
-					//	Insa nu pare sa fie acelasi caz aici, pare ca lucram pe obiectul in sine, nu copiat, si pe el facem modificari, cu toate astea nu merge
-					//	Am incercat multe chestii, care mai de care din ce in ce mai ciudate si fara sens. Deocamdata nu mai am nicio idee :(
-					//  Incercand sa scriu coul in alte metode reuseam sa mai primesc si eroarea "vector erase iterator outside range"
-					// 
-					auto beginEntry = tables[pozTable].getRefEntries().begin();
-					auto endEntry = tables[pozTable].getRefEntries().end();
-					for (int i = 0; i < tables[pozTable].getRefEntries().size(); i++) {			 // tables[pozTable].getEntries() este vector<Entry> entries din tabela cu poz pozTable din tables
-						if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] == searchedValue) { // verificam daca pe coloana cu indexul pozColumn al entry-ului i valoarea este egala cu valoarea cautata
-							if (((beginEntry + i) != endEntry) && (beginEntry != endEntry)) {
+					//			tables[pozTable].getRefEntries().erase(beginEntry + i);		   //******PARE CA LA RANDUL ASTA SE INTAMPLA NENOROCIREA*******
 
-								tables[pozTable].getRefEntries().erase(beginEntry + i);		   //******PARE CA LA RANDUL ASTA SE INTAMPLA NENOROCIREA*******
-
-								i--;
-							}
+					//			i--;
+					//		}
+					//	}
+					//}
+					vector<Entry> newEntries;
+					for (int i = 0; i < tables[pozTable].getEntries().size(); i++) {
+						if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] != searchedValue) { // cand gasim entry care se potriveste
+							newEntries.push_back(tables[pozTable].getEntries()[i]);
 						}
 					}
+					tables[pozTable].getRefEntries() = newEntries;
+					
 				}
 				else {
 					cout << "\nColoana inexistenta!\n";
