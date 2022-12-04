@@ -58,9 +58,12 @@ Entry::Entry(int newNumberArguments, string* newArguments) {
 		this->numberArguments = newNumberArguments;
 		this->arguments = new string[numberArguments];
 		int j = 0;
-		for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
-			this->arguments[j] = newArguments[i];
-			++j;
+		//for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
+		//	this->arguments[j] = newArguments[i];
+		//	++j;
+		//}
+		for (int i = 0; i < newNumberArguments; i++) {
+			this->arguments[i] = newArguments[i];
 		}
 	}
 	else {
@@ -112,8 +115,8 @@ Table::~Table() {
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
-	try{
-		if (stoi(arguments[0]) - 4 != numberArguments) {
+	try{//insert into table_name values((col1, col2, col3), (col11, col12, col13), ...)
+		if ((stoi(arguments[0]) - 4) % table.head.getNrColumns() != 0) {
 			exception e("\nNumar invalid de argumente!\n");
 			throw e;
 		}
@@ -125,12 +128,25 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 				throw e;
 			}
 			++j;
+			if (j == table.head.getDataSize().size()) {
+				j = 0;
+			}
 		}
 		//abia daca trec de check fac un entry nou pe care il pushez
-		Entry* ent = new Entry(numberArguments, arguments);
-		push_back_flag = true;
-		table.entries.push_back(*ent);
-		push_back_flag = false;
+		j = 5;
+		while(j < stoi(arguments[0])) {
+			string* aux = new string[table.head.getNrColumns()];
+			for (int i = 0; i < table.head.getNrColumns(); i++) {
+				aux[i] = arguments[j];
+				j++;
+			}
+			
+			Entry* ent = new Entry(table.head.getNrColumns(), aux);
+			push_back_flag = true;
+			table.entries.push_back(*ent);
+			push_back_flag = false;
+			delete[] aux;
+		}
 	}
 	catch (exception e) {
 		cout << e.what();
