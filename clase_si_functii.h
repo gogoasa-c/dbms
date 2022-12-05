@@ -50,6 +50,8 @@ public:
 
 	bool operator==(const Entry&);
 	void operator=(const Entry&);
+
+	operator int();
 	//----------------------------------------------------------------------
 
 	// GET
@@ -82,6 +84,14 @@ public:
 
 	Entry& operator[](int);						//create table t; t[0] => t.entries[0]; word[2] = numetabel; word[2][0] => t.entries[0]
 	void operator=(const Table&);
+
+	Table operator+(Table);
+
+	Table& operator++();
+	Table operator++(int);
+
+	operator string();
+	
 	bool operator>(const Table&);
 	bool operator>=(const Table&);
 	bool operator<(const Table&);

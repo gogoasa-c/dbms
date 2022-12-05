@@ -193,6 +193,10 @@ bool Entry::operator==(const Entry& ent) {
 	return true;
 }
 
+Entry::operator int() {
+	return this->numberArguments;
+}
+
 Entry& Table::operator[](int index) {
 	try {
 		if (index < 0 || index >= this->entries.size()) { //e cu || conditia ca nu poate sa fie si mai mic decat 0 index si mai mare decat marimea entry-urilor care e numar pozitiv
@@ -230,6 +234,34 @@ void Table::operator=(const Table& t) {
 	this->name = t.name;
 	this->head = t.head;
 	this->entries = t.entries;
+}
+
+Table Table::operator+(Table t) {
+	Table copie;
+	
+	if (this->head.getTableHead() == t.head.getTableHead() && this->head.getDataType() == t.head.getDataType() && this->head.getDataSize() == t.head.getDataSize() && this->head.getImplicitValue() == t.head.getImplicitValue()) {
+		copie = *this;
+		for (int i = 0; i < this->head.getTableHead().size(); i++) {
+			copie.addEntry(t.entries[i].getNumberArguments(), t.entries[i].getArguments(), t);
+		}
+	}
+	
+	return copie;
+}
+
+Table& Table::operator++() {
+	cin >> *this;
+	return *this;
+}
+
+Table Table::operator++(int) {
+	Table copie = *this;
+	cin >> *this;
+	return copie;
+}
+
+Table::operator string() {
+	return this->name;
 }
 
 bool Table::operator>(const Table& aux) {
