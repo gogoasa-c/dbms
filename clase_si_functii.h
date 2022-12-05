@@ -67,8 +67,8 @@ public:
 };
 
 class Table {
-	static int numarTabeleCreate;
-	const int idTabel;
+	/*static int numarTabeleCreate;
+	const int idTabel;*/
 	string name;//nume tabel
 	Header head;
 	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
@@ -116,7 +116,7 @@ public:
 	~Table();
 };
 
-int Table::numarTabeleCreate = 0;
+//int Table::numarTabeleCreate = 0;
 
 bool isNumber(string);
 bool no_missing_arguments(string*);

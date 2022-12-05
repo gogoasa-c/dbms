@@ -96,25 +96,25 @@ Entry::~Entry() {
 	}
 }
 
-Table::Table(const Table& t):idTabel(Table::numarTabeleCreate){
-	numarTabeleCreate++;
+Table::Table(const Table& t)/*:idTabel(Table::numarTabeleCreate)*/{
+	/*numarTabeleCreate++;*/
 	this->name = t.name;
 	this->head = t.head;
 	this->entries = t.entries;
 }
 
-Table::Table(): head(nullptr),idTabel(Table::numarTabeleCreate) {
-	numarTabeleCreate++;
+Table::Table(): head(nullptr)/*,idTabel(Table::numarTabeleCreate)*/ {
+	/*numarTabeleCreate++;*/
 	this->name = "null";
 }
 
-Table::Table(string* word): head(word), idTabel(Table::numarTabeleCreate) { //pt coloanele tabelului/capul de tabel
-	numarTabeleCreate++;
+Table::Table(string* word): head(word)/*, idTabel(Table::numarTabeleCreate)*/ { //pt coloanele tabelului/capul de tabel
+	/*numarTabeleCreate++;*/
 	this->name = word[3];
 }
 
 Table::~Table() {
-	numarTabeleCreate--;
+	/*numarTabeleCreate--;*/
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
