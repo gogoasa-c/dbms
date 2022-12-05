@@ -1,30 +1,29 @@
 //aici implementam clasele si functiile propriu-zis
+// Proiect de echipa realziat de: Ghita Valentin, Gogoasa Cristian, Ionel Teodor
 #include "clase_si_functii.h"
 
 using namespace std;
-
-bool push_back_flag = false;
 
 int Table::numberCreatedTables = 0;
 
 Database* Database::instance = nullptr;
 
 Database::Database() {
-
+	//nu e nevoie sa faca nimic
 }
 
 Database* Database::getInstance() {
-	if (!Database::instance) {
+	if (!Database::instance) { // creaza unica instanta a clasei Database
 		instance = new Database;
 	}
 	return Database::instance;
 }
 
-vector<Table>& Database::getTables() {
+vector<Table>& Database::getTables() { // intoarce referinta la tables sa putem modifica vectorul
 	return this->tables;
 }
 
-void Database::setTables(vector<Table> t) {
+void Database::setTables(vector<Table> t) { 
 	this->tables = t;
 }
 
@@ -81,10 +80,6 @@ Entry::Entry(int newNumberArguments, string* newArguments) {
 		this->numberArguments = newNumberArguments;
 		this->arguments = new string[numberArguments];
 		int j = 0;
-		//for (int i = 5; i <= stoi(newArguments[0]); i++) { //si incepem cu al 5-lea cuvant pana la final
-		//	this->arguments[j] = newArguments[i];
-		//	++j;
-		//}
 		for (int i = 0; i < newNumberArguments; i++) {
 			this->arguments[i] = newArguments[i];
 		}
@@ -168,9 +163,7 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 			}
 			
 			Entry* ent = new Entry(table.head.getNrColumns(), aux);
-			push_back_flag = true;
 			table.entries.push_back(*ent);
-			push_back_flag = false;
 			delete[] aux;
 		}
 	}
@@ -210,16 +203,6 @@ Entry& Table::operator[](int index) {
 		cout << e.what();
 		Entry ent(0, nullptr); // cred ca asta voiati sa faceti
 		return ent;
-		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!! (cumva undeva in afara functiei, in mod evident, dar Vali nu stie cum. PS: nici teol; bafta cristi!)
-		
-		/*Entry* ent = new Entry(0, NULL);
-		push_back_flag = true;
-		this->entries.push_back(*ent);
-		push_back_flag = false;
-		
-		return this->entries[this->entries.size() - 1];*/
-
-		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!!
 	}	
 }
 
@@ -330,7 +313,6 @@ ostream& operator<< (ostream& out, const Entry& ent) {
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		Header h = tab.head;
 		out << endl;
-		
 		for (int i = 0; i < h.getTableHead().size()/2; i++) {
 			out << '\t' << '\t';
 		}
@@ -338,29 +320,11 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		for (int i = h.getTableHead().size()/2; i < h.getTableHead().size(); i++) {
 			out << '\t' << '\t';
 		}
-		/*out << endl;
-		
-		for (int i = 0; i < h.getTableHead().size(); i++) {
-			out << "++++++++++++++++++++++";
-		}*/
-		//out << endl;
 		out << tab.head;
-		//for (int i = 0; i < tab.tableHead.size(); i++) { //afisam fiecare coloana cu dataType, dataSize si valoarea implicita
-		//	out << tab.tableHead[i] << "/";
-		//	out << tab.dataType[i] << "/";
-		//	out << tab.dataSize[i] << "/";
-		//	out << tab.implicitValue[i] << "\t";
-		//}
-		
-		//out << endl;
-		/*for (int i = 0; i < h.getTableHead().size(); i++) {
-			out << "++++++++++++++++++++++";
-		}*/
 		out << endl;
 		for (int i = 0; i < tab.entries.size(); i++) {
 			out << tab.entries[i] << "\n";
 		}
-		
 		return out;
 }
 
@@ -380,12 +344,9 @@ istream& operator>>(istream& in, Table& tb) {						 //cin >> numeTabel => un nou
 bool check_for_parenthesis_and_commas(string userInput)
 {
 	int openedParanthesis = 0;
-	//bool properCommasSyntax = true;
-
 	if (userInput[userInput.size() - 1] == ',') {
 		return false;
 	}
-
 	for (int i = 0; i < userInput.size(); i++) {
 		if (userInput[i] == '(') {
 			openedParanthesis++;
@@ -517,6 +478,22 @@ bool isNumber(string s) {
 	return true;
 }
 
+bool isFloatingPoint(string s) {
+	bool hasPoint = false;
+	for (int i = 0; i < s.length(); i++) {
+		if (isdigit(s[i]) == 0) {
+			if(!hasPoint && s[i] == '.') {
+				hasPoint = true;
+				
+			}
+			else{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 bool no_missing_arguments(string* word) {
 	try{
 		if (stoi(word[0]) < 3 && word[1] != "exit") {
@@ -580,7 +557,7 @@ bool no_missing_arguments(string* word) {
 			}
 		}
 		else if (word[1] == "select") {
-			//nu prea avem cum face check aici pe select. trebuie sa vedem numele de coloane mai jos in identify_command_type()
+			//nu prea avem cum face check aici pe select. trebuie sa vedem numele de coloane mai jos in identify_command_type(); rezolvat in identify_command_type
 			return true;
 		}
 		else if (word[1] == "delete") {
@@ -619,8 +596,6 @@ bool no_missing_arguments(string* word) {
 			throw e;
 			return false;
 		}
-		//trebuie adaugat un check pt select :D
-		
 		return true;
 	}
 	catch (exception* e) {
@@ -630,7 +605,7 @@ bool no_missing_arguments(string* word) {
 
 int identify_command_type(string* word, vector<Table>& tables) {
 	if (word == nullptr) {
-		return 1;
+		return 1;//check pentru input invalid
 	}
 	if (word[1] == "exit") {
 		return 0;
@@ -829,29 +804,9 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			if (TableExists(tableName, tables, pozTable)) {						   				 // functie care verifica existenta tabelei in vectorul de tabele si modifica prin referinta pozitia tabelei in caz ca tabela exista 
 				string columnName = word[5];									 				 // numele coloanei pe care o egalam cu o valoare anume, iar inregistrarile care au pe coloana columnName valoare precizata vor fi sterse
 				int pozColumn = -1;															     // pozitia coloanei pt care cautam inregistrari ce urmeaza a fi sterse
-				if (columnExists(columnName, tables[pozTable].head.getTableHead(), pozColumn)) { // abominatia asta: tables[pozTable].head.getTableHead() inseamna ca in vectorul de tabele tables, ne ducem la tabela pe care o dorim a 
+				if (columnExists(columnName, tables[pozTable].head.getTableHead(), pozColumn)) { // tables[pozTable].head.getTableHead() inseamna ca in vectorul de tabele tables, ne ducem la tabela pe care o dorim a 
 																								 // carei pozitie este pozTable, apoi ne ducem la membrul head, iar apoi la metoda getTableHead() care returneaza vector<string>
 					string searchedValue = word[7];												 // stringul corespunzator lui "valoare" din sintaxa este word[7]
-					
-
-					////	Aceasta parte de mai jos functioneaza decat daca avem un singur entry in toata tabela caruia ii dam delete. altfel da eroare abort()
-					////	Tot ce am gasit pe net sunt probleme in care codul foloseaza copy si nu referinte astfel ca nu iesea bine din nush ce motive
-					////	Insa nu pare sa fie acelasi caz aici, pare ca lucram pe obiectul in sine, nu copiat, si pe el facem modificari, cu toate astea nu merge
-					////	Am incercat multe chestii, care mai de care din ce in ce mai ciudate si fara sens. Deocamdata nu mai am nicio idee :(
-					////  Incercand sa scriu coul in alte metode reuseam sa mai primesc si eroarea "vector erase iterator outside range"
-					//// 
-					//auto beginEntry = tables[pozTable].getRefEntries().begin();
-					//auto endEntry = tables[pozTable].getRefEntries().end();
-					//for (int i = 0; i < tables[pozTable].getRefEntries().size(); i++) {			 // tables[pozTable].getEntries() este vector<Entry> entries din tabela cu poz pozTable din tables
-					//	if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] == searchedValue) { // verificam daca pe coloana cu indexul pozColumn al entry-ului i valoarea este egala cu valoarea cautata
-					//		if (((beginEntry + i) != endEntry) && (beginEntry != endEntry)) {
-
-					//			tables[pozTable].getRefEntries().erase(beginEntry + i);		   //******PARE CA LA RANDUL ASTA SE INTAMPLA NENOROCIREA*******
-
-					//			i--;
-					//		}
-					//	}
-					//}
 					vector<Entry> newEntries;
 					for (int i = 0; i < tables[pozTable].getEntries().size(); i++) {
 						if (tables[pozTable].getRefEntries()[i].getArguments()[pozColumn] != searchedValue) { // cand gasim entry care se potriveste
@@ -889,11 +844,14 @@ int identify_command_type(string* word, vector<Table>& tables) {
 								for (int j = 0; j < numberArguments; j++) {
 									newArguments[j] = tables[pozTable].entries[i].getArguments()[j];			//egalam newArguments cu argumentele vechi mai intai
 								}
-								
-								newArguments[pozColumn1] = setValue;											//pozitia in newArguments pe care vrem sa o modificam ia valoarea pe care vrem s-o setam
-
-								tables[pozTable].entries[i].setArguments(numberArguments, newArguments);
-								
+								//imi cer scuze pentru check-ul asta lung
+								if ((tables[pozTable].head.getDataType()[pozColumn1] == "int" && isNumber(setValue)) || (tables[pozTable].head.getDataType()[pozColumn1] == "float" && (isNumber(setValue) || isFloatingPoint(setValue))) || (tables[pozTable].head.getDataType()[pozColumn1] == "text" && !isNumber(setValue))) { // aici trebuie sa vina un check daca e ok valoarea cu tipul de data
+									newArguments[pozColumn1] = setValue;											//pozitia in newArguments pe care vrem sa o modificam ia valoarea pe care vrem s-o 
+									tables[pozTable].entries[i].setArguments(numberArguments, newArguments);
+								}
+								else {
+									cout << "\nTip de data introdus incompatibil!\n";
+								}
 								delete[] newArguments;
 							}
 						}
@@ -910,24 +868,25 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				cout << "\nTabel inexistent!\n";
 			}
 		}
-
-
-		//if (word[1] == "select") return 2;
-		//if (word[1] == "update") return 3;
-		//if (word[1] == "delete") return 4;
-		
 		delete[] word;
-		//identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), tables);
 		return 1;
-		//return -1;
 	}
-	//return 0;
+}
+
+void menu() {
+	Database* db = db->getInstance();
+	cout << "Beta 1.0\n";
+	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
+
+	while (true) {
+		int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());
+		if (aux == 0)
+			break;//FUNCTIONEAZA
+	}
 }
 
 //---------------------------------> TABLE CLASS <-------------------------------------
-
 // GET for Table class
-
 string Table::getName() {
 	return this->name;
 }
@@ -967,7 +926,6 @@ vector<Entry>& Table::getRefEntries()
 }
 
 // SET for Table class
-
 void Table::setName(string newName)
 {
 	if(newName.length()>1)
@@ -1007,9 +965,7 @@ void Table::setEntries(vector<Entry> newEntries)
 }
 
 //---------------------------------> ENTRY CLASS <-------------------------------------
-
 // GET for Entry class
-
 int Entry::getNumberArguments()
 {
 	return this->numberArguments;
@@ -1021,7 +977,6 @@ string* Entry::getArguments()
 }
 
 // SET for Entry class
-
 void Entry::setArguments(int newNumberArguments, string* newArguments)
 {
 	try
