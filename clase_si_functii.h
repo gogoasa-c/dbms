@@ -18,6 +18,8 @@ public:
 	Header(string*);
 	Header(const Header&);
 
+	void operator=(const Header&);
+
 	void setTableHead(vector<string> newTableHead);
 	void setDataType(vector<string> newDataType);
 	void setDataSize(vector<int> newDataSize);
@@ -67,8 +69,8 @@ public:
 };
 
 class Table {
-	/*static int numarTabeleCreate;
-	const int idTabel;*/
+	static int numberCreatedTables;
+	const int tableId;
 	string name;//nume tabel
 	Header head;
 	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
@@ -79,7 +81,7 @@ public:
 	Table(const Table&);
 
 	Entry& operator[](int);						//create table t; t[0] => t.entries[0]; word[2] = numetabel; word[2][0] => t.entries[0]
-	
+	void operator=(const Table&);
 	bool operator>(const Table&);
 	bool operator>=(const Table&);
 	bool operator<(const Table&);
@@ -116,7 +118,19 @@ public:
 	~Table();
 };
 
-//int Table::numarTabeleCreate = 0;
+class Database { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect instantiat; p.s.: nu e varianta thread-safe
+	static Database* instance;
+	vector<Table> tables;
+	Database();
+public:
+	Database(const Database&) = delete; // nu trebuie sa fie clonabila
+
+	void operator=(const Database&) = delete; // si nici asignabila
+
+	static Database* getInstance();
+	vector<Table>& getTables();
+	void setTables(vector<Table>);
+};
 
 bool isNumber(string);
 bool no_missing_arguments(string*);

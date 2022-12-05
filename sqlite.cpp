@@ -8,12 +8,14 @@ using namespace std;
 
 int main()
 {
+    Database* db = db->getInstance();
+
     vector<Table> tables;
     cout << "Beta v0.9\n";
     cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 
     while (true) {
-        int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), tables);     //am modificat return type-ul ca uneori dupa 2-3 display-uri de tabel nu mai functiona
+        int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());     //am modificat return type-ul ca uneori dupa 2-3 display-uri de tabel nu mai functiona
                                                                                                                        //suspectam ca e fiindca aveam un while true in ea care se apela pe sine recursiv si poate nu ii placea asta idk
         if (aux == 0)
             break;//FUNCTIONEAZA

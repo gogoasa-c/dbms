@@ -5,6 +5,29 @@ using namespace std;
 
 bool push_back_flag = false;
 
+int Table::numberCreatedTables = 0;
+
+Database* Database::instance = nullptr;
+
+Database::Database() {
+
+}
+
+Database* Database::getInstance() {
+	if (!Database::instance) {
+		instance = new Database;
+	}
+	return Database::instance;
+}
+
+vector<Table>& Database::getTables() {
+	return this->tables;
+}
+
+void Database::setTables(vector<Table> t) {
+	this->tables = t;
+}
+
 Header::Header() {
 
 }
@@ -96,25 +119,25 @@ Entry::~Entry() {
 	}
 }
 
-Table::Table(const Table& t)/*:idTabel(Table::numarTabeleCreate)*/{
-	/*numarTabeleCreate++;*/
+Table::Table(const Table& t):tableId(numberCreatedTables){
+	numberCreatedTables++;
 	this->name = t.name;
 	this->head = t.head;
 	this->entries = t.entries;
 }
 
-Table::Table(): head(nullptr)/*,idTabel(Table::numarTabeleCreate)*/ {
-	/*numarTabeleCreate++;*/
+Table::Table(): head(nullptr), tableId(numberCreatedTables){
+	numberCreatedTables++;
 	this->name = "null";
 }
 
-Table::Table(string* word): head(word)/*, idTabel(Table::numarTabeleCreate)*/ { //pt coloanele tabelului/capul de tabel
-	/*numarTabeleCreate++;*/
+Table::Table(string* word): head(word), tableId(numberCreatedTables){ //pt coloanele tabelului/capul de tabel
+	numberCreatedTables++;
 	this->name = word[3];
 }
 
 Table::~Table() {
-	/*numarTabeleCreate--;*/
+	
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
@@ -194,6 +217,19 @@ Entry& Table::operator[](int index) {
 
 		//!!! AR TREBUI DUPA SA STERGEM    this->entries[this->entries.size() - 1] !!!
 	}	
+}
+
+void Header::operator=(const Header& h) {
+	this->tableHead = h.tableHead;
+	this->dataType = h.dataType;
+	this->dataSize = h.dataSize;
+	this->implicitValue = h.implicitValue;
+}
+
+void Table::operator=(const Table& t) {
+	this->name = t.name;
+	this->head = t.head;
+	this->entries = t.entries;
 }
 
 bool Table::operator>(const Table& aux) {
