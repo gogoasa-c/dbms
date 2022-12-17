@@ -344,6 +344,9 @@ istream& operator>>(istream& in, Table& tb) {						 //cin >> numeTabel => un nou
 bool check_for_parenthesis_and_commas(string userInput)
 {
 	int openedParanthesis = 0;
+	if (userInput.size() == 0) {
+		return true;
+	}
 	if (userInput[userInput.size() - 1] == ',') {
 		return false;
 	}
@@ -873,11 +876,11 @@ int identify_command_type(string* word, vector<Table>& tables) {
 	}
 }
 
-void menu() {
+void menu(int& argsc, char* argsv[]) {
 	Database* db = db->getInstance();
 	cout << "Beta 1.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
-
+	readFromFiles(argsc, argsv, db);
 	while (true) {
 		int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());
 		if (aux == 0)
@@ -1000,5 +1003,69 @@ void Entry::setArguments(int newNumberArguments, string* newArguments)
 	catch (exception e) 
 	{
 		cout << e.what();
+	}
+}
+
+void take_user_input_from_file(ifstream& f, vector<string>& inputs) { // crapa aici in functie momentan 
+	int i = 0;
+	string aux;
+	char* auxCh = new char[150];
+	bool allInputValid = true;
+	while(f.getline(auxCh, 149)){ // citim in auxCh care tine minte linia ca un char*
+		aux = auxCh; // facem conversia intr-un std::string
+		if (aux.size() == 0) {
+			continue;
+		}
+		if (check_for_parenthesis_and_commas(aux)) {
+			for (int i = 0; i < aux.size(); i++) {
+				if (aux[i] >= 'A' && aux[i] <= 'Z') {
+					aux[i] += 32;										//value of 'a' - 'A'
+				}
+			}
+		}
+		else {
+			cout << "\nSintaxa gresita! Sintaxa corecta are virgule, dupa virgule spatii, iar toate parantezele deschise trebuie si inchise!\n";
+			aux = "invalid";
+			allInputValid = false;
+		}
+		inputs.push_back(aux);
+	}
+	delete[] auxCh;
+}
+
+void readFromFiles(int& argsc, char* argsv[], Database* db) {
+	vector<char*> textFiles;
+	bool allValidFiles = true;
+	try {
+		if (argsc > 6) {
+			throw new exception("\nPrea multe fisiere text introudse");
+		}
+		for (int i = 1; i < argsc; i++) {
+			char* aux = argsv[i] + (strlen(argsv[i]) - 4); // ia ultimele patru caractere din argument
+			if (!strcmp(".txt", aux)) { // daca aux == ".txt"
+				textFiles.push_back(argsv[i]); // tinem minte fisierul ca fisier text
+			}
+			else {
+				allValidFiles = false;
+				throw new exception("\nUnul sau mai multe fisiere nu au extensia .txt! Command Line Input invalid!");
+			}
+		}
+	}
+	catch (exception e) {
+		cout << e.what() << endl;
+	}
+	if (allValidFiles) { // daca toate fisierele au extensia valida
+		for (int i = 0; i < textFiles.size(); i++) { // luam fiecare fisier in parte si executam comenzile in el 
+			ifstream f(textFiles[i]);
+
+			vector<string> inputs;
+			take_user_input_from_file(f, inputs); // inputurile din fisier
+			for (int j = 0; j < inputs.size(); j++) {
+				string* lineWords = split_string_into_words(inputs[j]);
+				identify_command_type(lineWords, db->getTables());
+			}
+
+			f.close();
+		}
 	}
 }

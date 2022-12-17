@@ -1,0 +1,3 @@
+create table tabel nume text 10 0 salariu int 6 0
+insert into tabel values Adrian, 1000, Cristian, 5000, Askdafm, 4000
+display table tabel

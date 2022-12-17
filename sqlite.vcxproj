@@ -135,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ciorna.txt" />
+    <Text Include="comenzi1.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

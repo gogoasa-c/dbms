@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos (seteaza "weight"-ul cout-urilor, adica le forteaza sa afiseze un anumit numar de caractere)
+#include <fstream>
 using namespace std;
 
 class Header {
@@ -128,7 +129,7 @@ bool no_missing_arguments(string*);
 bool check_for_parenthesis_and_commas(string);
 string take_user_input_and_convert_lowercase();		//preia inputul decat de la tastatura (eventual va trebui modificata pt a prelua si din fisiere)
 													//si converteste tot string-ul la lowercase pt a nu conta CAPS/NO CAPS
-
+void take_user_input_from_file(ifstream&, vector<string>&);
 string* split_string_into_words(string);			//imparte string-ul initial in vector de string-uri care cuvinte/argumentele; word[j] = al j-lea 
 													//cuvant/argument introdus de la tastatura
 													//vom putea refolosi functia si pt a pasa la clase cuvant cu cuvant stringul si a asigna corespunzator
@@ -138,4 +139,5 @@ bool columnExists(string, vector<string>, int&); // verifica daca coloana exista
 bool TableExists(string, vector<Table>&);//verifica daca tabelul exista in vectorul de tabele
 bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista in vectorul de tabele si in int& modifica pozitia pe care l-a gasit
 int identify_command_type(string*, vector<Table>&);	//functia principala care face majoritatea muncii
-void menu();
+void menu(int&, char* []);
+void readFromFiles(int&, char* [], Database*);

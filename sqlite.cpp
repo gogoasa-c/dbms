@@ -8,8 +8,9 @@
 
 using namespace std;
 
-int main()
+int main(int argsc, char* argsv[])
 {
-    menu();
+    
+    menu(argsc, argsv);
     return 0;
 }
