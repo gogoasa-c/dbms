@@ -34,5 +34,11 @@
     <Text Include="comenzi1.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="content-in-binary.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="headers-in-binary.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

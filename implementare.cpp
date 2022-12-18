@@ -31,6 +31,10 @@ vector<Table>& Database::getTables() { // intoarce referinta la tables sa putem 
 	return this->tables;
 }
 
+vector<Table> Database::getTablesNoRef() { // intoarce referinta la tables sa putem modifica vectorul
+	return this->tables;
+}
+
 void Database::setTables(vector<Table> t) { 
 	this->tables = t;
 }
@@ -942,7 +946,12 @@ int identify_command_type(string* word, vector<Table>& tables) {
 void menu(int& argsc, char* argsv[]) {
 	Database* db = db->getInstance();
 	
-	
+	fstream f1, f2;
+
+	//f1.open("headers-in-binary.txt", ios::in | ios::binary);
+	//f2.open("content-in-binary.txt", ios::in | ios::binary);
+	////implementare citire din aceste fisiere in baza noastra de date
+	//f1.close(); f2.close();
 
 	cout << "Beta 1.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
@@ -953,7 +962,13 @@ void menu(int& argsc, char* argsv[]) {
 			break;//FUNCTIONEAZA
 	}
 
-	
+	f1.open("headers-in-binary.txt", ios::out | ios::trunc | ios::binary);
+	write_headers_to_binary_file(f1, db->getTables());
+	f1.close();
+
+	f2.open("content-in-binary.txt", ios::out | ios::trunc | ios::binary);
+	write_content_to_binary_file(f2, db->getTables());
+	f2.close();
 }
 
 //---------------------------------> TABLE CLASS <-------------------------------------
@@ -996,7 +1011,10 @@ vector<Entry>& Table::getRefEntries()
 	return this->entries;
 }
 
-
+Header Table::getHeader()
+{
+	return this->head;
+}
 
 // SET for Table class
 void Table::setName(string newName)
@@ -1154,3 +1172,105 @@ void Database::readFromFiles(int& argsc, char* argsv[]) {
 	}
 }
 
+void write_headers_to_binary_file(fstream& f, vector<Table>& t)
+{
+	//deoarece toate tabele existente trebuie sa aiba deja un format corespunzator, m-am gandit in fisierul binar
+	//in loc de : sizeof(vector1) data(vector1) int float sizeof(vector2) data(vector2) ... etc (formatul de la seminarul 11 de poo)
+	//sa am : int N (numar_de_tabele);; nume_tabel_1 header_1 (adica tableHead_1[j], dataType_1[j], dataSize_1[j], implicitValue_1[j]), ... nume_tabel_N header_N 
+	//(unde j este nr coloane ale tabelului la care face referinta)
+	//din moment ce oricum size-ul vectorilor stl din header au toti aceeasi marime, anume egala cu numarul de tabele existente in baza de date 
+	
+	//in final rezulta ceva de genul:
+	//nr_tabele ;; nume_tabel[i] ;; nr_coloane_tabel[i] ;; header[i] ( == tableHead_[i][j], dataType_[i][j], dataSize_[i][j], implicitValue_[i][j] , unde j = nr coloane, j=[0, nr_coloane]) ;; 
+
+	//ex vizionat in text:
+	//2 lungime_nume_tabel_1(=9) angajati 2 lungime_string(=5) nume lungime_string(=5) text 20 lungime_string(=1) 0 lungime_string salariu lungime_string int 10 lungime_string 0
+	//		lungime_nume_tabel_2 firme 2 lungime_string cui lungime_string text 6 lungime_string 0 lungime_string capital lungime_string int 30 lungime_string 0
+	
+	int nrTables = t.size();
+	string name;
+	string headerInfo;		//that will be tableHead, dataType or implicitValue
+	int headerDataSize;		//dataSize
+	int lenght;				//va stoca lungimile vectorilor ce urmeaza a fi scrisi in fisier in binar
+	int nrColumns;			//numarul de coloane al unui tabel la un moment dat
+
+	f.write((char*)&nrTables, sizeof(int));			//cate tabele avem in total
+
+	for (int i = 0; i < nrTables; i++) {			//pt fiecare tabel vom afisa nume, header
+		name = t[i].getName();
+		lenght = name.size() + 1;
+		f.write((char*)&lenght, sizeof(int));
+		f.write(name.data(), lenght * sizeof(char));
+
+		nrColumns = t[i].getHeader().getTableHead().size();
+		f.write((char*)&nrColumns, sizeof(int));
+		for (int j = 0; j < nrColumns; j++) {				//pt atatea coloane cate are tabelul, vom afisa headerul respectiv
+			//pentru tableHead
+			headerInfo = t[i].getHeader().getTableHead()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataType
+			headerInfo = t[i].getHeader().getDataType()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataSize
+			headerDataSize = t[i].getHeader().getDataSize()[j];
+			f.write((char*)&headerDataSize, sizeof(int));
+			//pt implicitValue
+			headerInfo = t[i].getHeader().getImplicitValue()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+		}	
+	}
+}
+
+void write_content_to_binary_file(fstream& f, vector<Table>& t)
+{
+	//vom face referinta la structura tabelelor cunoscuta deja din clasa HEAD a fiecarei tabele in parte, astfel ca vom cunoaste deja lucruri esentiale, precum:
+	//nr de coloane care este egal cu numarul de argumente din entry-urile respectivei tabele (vezi clasa Table si Head)
+	//si in momentul apelarii acestei functii avel deja create tabelele cu formatul lor, insa goale, fara entry-uri
+	
+	//format:
+	//nr_tabele ;; nr_entries[i] ;; entries[i][0] ... entries[i][j] ;; (unde i = nr de tabele;   j = nr entries per tabela)
+	
+	//ex vizionat in text:
+	//4 3 lungime_string(=9) Valentin lungime_string(=5) 1000 lungime_string(=9) Cristian lungime_string(=5) 2000 lungime_string(=7) Teodor lungime_string(=5) 3000 0 7 lungime_string mar 
+	//		lungime_string banana lungime_string para lungime_string mandarina lungime_string portocala lungime_string nectarina lungime_string gutuie 0
+
+	int nrTables = t.size();
+	int nrEntries;									//nr of entries per table[i], where i is count for loop
+	int nrColumns;	// == Entry::numberArguments
+	int lenght;
+	int nrArguments;	//look into class Entry
+	string partOfEntry;	//holds the i-th string at the i iteration of the loop of the member string* arguments of class Entry
+
+	f.write((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {
+		nrColumns = t[i].getHeader().getTableHead().size();
+		nrEntries = t[i].getEntries().size();
+		f.write((char*)&nrEntries, sizeof(int));
+		for (int j = 0; j < nrEntries; j++) {
+			nrArguments = t[i].getEntries()[j].getNumberArguments();
+			//aici se mai putea si sa scriem in fisier nr de argumente ale fiecarui entry in parte, dar deja stim ca este egal cu nr de coloane al fiecarei tabele
+			for (int k = 0; k < nrArguments; k++) {
+				lenght = t[i].getEntries()[j].getArguments()[k].size() + 1;
+				f.write((char*)&lenght, sizeof(int));
+				partOfEntry = t[i].getEntries()[j].getArguments()[k];
+				f.write(partOfEntry.data(), lenght * sizeof(char));
+			}
+		}
+	}
+}
+
+//void write_headers_to_binary_file(fstream& f, vector<Table>& t)
+//{
+//
+//}
+//
+//void write_content_to_binary_file(fstream& f, vector<Table>& t)
+//{
+//
+//}
