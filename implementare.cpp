@@ -8,6 +8,13 @@ int Table::numberCreatedTables = 0;
 
 Database* Database::instance = nullptr;
 
+
+
+bool fileExists(char* name) { // verificam daca exista fisierul respectiv
+	ifstream f(name); // .c_str transforma std::string-ul in char*
+	return f.good();
+}
+
 Database::Database() {
 	//nu e nevoie sa faca nimic
 }
@@ -880,7 +887,7 @@ void menu(int& argsc, char* argsv[]) {
 	Database* db = db->getInstance();
 	cout << "Beta 1.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
-	readFromFiles(argsc, argsv, db);
+	db->readFromFiles(argsc, argsv);
 	while (true) {
 		int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());
 		if (aux == 0)
@@ -1033,7 +1040,7 @@ void take_user_input_from_file(ifstream& f, vector<string>& inputs) { // crapa a
 	delete[] auxCh;
 }
 
-void readFromFiles(int& argsc, char* argsv[], Database* db) {
+void Database::readFromFiles(int& argsc, char* argsv[]) {
 	vector<char*> textFiles;
 	bool allValidFiles = true;
 	try {
@@ -1043,7 +1050,13 @@ void readFromFiles(int& argsc, char* argsv[], Database* db) {
 		for (int i = 1; i < argsc; i++) {
 			char* aux = argsv[i] + (strlen(argsv[i]) - 4); // ia ultimele patru caractere din argument
 			if (!strcmp(".txt", aux)) { // daca aux == ".txt"
-				textFiles.push_back(argsv[i]); // tinem minte fisierul ca fisier text
+				if(fileExists(argsv[i])) {
+					textFiles.push_back(argsv[i]); // tinem minte fisierul ca fisier text
+				}
+				else {
+					allValidFiles = false;
+					throw new exception("\nUnul sau mai multe fisiere nu exista!");
+				}
 			}
 			else {
 				allValidFiles = false;
@@ -1062,7 +1075,7 @@ void readFromFiles(int& argsc, char* argsv[], Database* db) {
 			take_user_input_from_file(f, inputs); // inputurile din fisier
 			for (int j = 0; j < inputs.size(); j++) {
 				string* lineWords = split_string_into_words(inputs[j]);
-				identify_command_type(lineWords, db->getTables());
+				identify_command_type(lineWords, this->getTables());
 			}
 
 			f.close();

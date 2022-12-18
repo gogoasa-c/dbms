@@ -7,7 +7,18 @@
 #include <vector>
 #include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos (seteaza "weight"-ul cout-urilor, adica le forteaza sa afiseze un anumit numar de caractere)
 #include <fstream>
+#include <filesystem>
 using namespace std;
+
+
+
+class writeToFile {
+
+};
+
+class readFromFile {
+	virtual void readFromFiles(int&, char* []) = 0;
+};
 
 class Header {
 	vector<string> tableHead;
@@ -109,7 +120,7 @@ public:
 	~Table();
 };
 
-class Database { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect instantiat; p.s.: nu e varianta thread-safe
+class Database : readFromFile { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect instantiat; p.s.: nu e varianta thread-safe
 	static Database* instance; //pointerul cu ajutorul caruia vom instantia unicul obiect de tip Database
 	vector<Table> tables; //vectorul in care tinem tabelele
 	Database();
@@ -121,6 +132,8 @@ public:
 	static Database* getInstance();
 	vector<Table>& getTables();
 	void setTables(vector<Table>);
+
+	void readFromFiles(int&, char* []); // citire din fisiere
 };
 
 bool isNumber(string);
@@ -140,4 +153,4 @@ bool TableExists(string, vector<Table>&);//verifica daca tabelul exista in vecto
 bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista in vectorul de tabele si in int& modifica pozitia pe care l-a gasit
 int identify_command_type(string*, vector<Table>&);	//functia principala care face majoritatea muncii
 void menu(int&, char* []);
-void readFromFiles(int&, char* [], Database*);
+bool fileExists(char*);
