@@ -109,6 +109,7 @@ public:
 	string getName();
 	vector<Entry> getEntries();
 	vector<Entry>& getRefEntries();
+	
 	// SET
 	void setName(string newName);
 	void setEntries(vector<Entry> newEntries);
@@ -154,3 +155,4 @@ bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista i
 int identify_command_type(string*, vector<Table>&);	//functia principala care face majoritatea muncii
 void menu(int&, char* []);
 bool fileExists(char*);
+

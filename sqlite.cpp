@@ -5,12 +5,12 @@
 
 #include "clase_si_functii.h"
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
 int main(int argsc, char* argsv[])
 {
-    
     menu(argsc, argsv);
     return 0;
 }

@@ -885,6 +885,9 @@ int identify_command_type(string* word, vector<Table>& tables) {
 
 void menu(int& argsc, char* argsv[]) {
 	Database* db = db->getInstance();
+	
+	
+
 	cout << "Beta 1.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 	db->readFromFiles(argsc, argsv);
@@ -893,6 +896,8 @@ void menu(int& argsc, char* argsv[]) {
 		if (aux == 0)
 			break;//FUNCTIONEAZA
 	}
+
+	
 }
 
 //---------------------------------> TABLE CLASS <-------------------------------------
@@ -934,6 +939,8 @@ vector<Entry>& Table::getRefEntries()
 {
 	return this->entries;
 }
+
+
 
 // SET for Table class
 void Table::setName(string newName)
@@ -1082,3 +1089,4 @@ void Database::readFromFiles(int& argsc, char* argsv[]) {
 		}
 	}
 }
+
