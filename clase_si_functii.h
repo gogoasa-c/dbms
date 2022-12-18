@@ -13,7 +13,7 @@ using namespace std;
 
 
 class writeToFile {
-
+	virtual void writeToFiles(const char*) = 0;
 };
 
 class readFromFile {
@@ -46,6 +46,8 @@ public:
 	friend ostream& operator <<(ostream&, const Header&);
 	//friend istream& operator>>(istream& in, Table& tb);
 
+	friend ofstream& operator <<(ofstream&, const Header&);
+
 	~Header();
 };
 
@@ -77,10 +79,12 @@ public:
 
 	friend ostream& operator<< (ostream&, const Entry&);
 
+	friend ofstream& operator<< (ofstream&, const Entry&);
+
 	~Entry();
 };
 
-class Table {
+class Table : writeToFile{
 	static int numberCreatedTables;
 	const int tableId;
 	string name;//nume tabel
@@ -116,6 +120,10 @@ public:
 	friend ostream& operator<<(ostream&, const Table&);
 	friend istream& operator>>(istream&, Table&);
 	friend int identify_command_type(string*, vector<Table>&); // l-am facut friend sa putem accesa campurile din clasa Table
+
+	friend ofstream& operator<<(ofstream&, const Table&);
+
+	void writeToFiles(const char*);
 
 	~Table();
 };
