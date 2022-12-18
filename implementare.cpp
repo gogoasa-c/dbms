@@ -8,6 +8,7 @@ int Table::numberCreatedTables = 0;
 
 Database* Database::instance = nullptr;
 
+int selectID = 0, displayID = 0; // pt fisiere sa tinem minte care fisier e la afisarea de "Rapoarte"
 
 
 bool fileExists(char* name) { // verificam daca exista fisierul respectiv
@@ -285,6 +286,25 @@ bool Table::operator!() {
 		return false;
 }
 
+ofstream& operator <<(ofstream& out, const Header& head) {
+	out << endl;
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << "++++++++++++++++++++++";
+	}
+	out << endl;
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << head.tableHead[i] << "|";
+		out << head.dataType[i] << "|";
+		out << "" << head.dataSize[i] << "|"; // nu merge fara "", nu stiu, suntem ca in fast inverse square root quake 3 cautati pe google
+		out << head.implicitValue[i] << "\t";
+	}
+	out << endl;
+	for (int i = 0; i < head.tableHead.size(); i++) {
+		out << "++++++++++++++++++++++";
+	}
+	return out;
+}
+
 ostream& operator<< (ostream& out, const Header& head) {
 	out << endl;
 	for (int i = 0; i < head.tableHead.size(); i++) {
@@ -317,6 +337,19 @@ ostream& operator<< (ostream& out, const Entry& ent) {
 	return out;
 }
 
+ofstream& operator<< (ofstream& out, const Entry& ent) {
+	ios init(NULL);
+	init.copyfmt(out);
+	out << setw(15);
+
+	for (int i = 0; i < ent.numberArguments; i++) {
+		out << ent.arguments[i] << "\t\t";
+	}
+
+	cout.copyfmt(init);
+	return out;
+}
+
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 		Header h = tab.head;
 		out << endl;
@@ -333,6 +366,24 @@ ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
 			out << tab.entries[i] << "\n";
 		}
 		return out;
+}
+
+ofstream& operator<<(ofstream& out, const Table& tab) {
+	Header h = tab.head;
+	out << endl;
+	for (int i = 0; i < h.getTableHead().size() / 2; i++) {
+		out << "\t" << '\t';
+	}
+	out << tab.name;
+	for (int i = h.getTableHead().size() / 2; i < h.getTableHead().size(); i++) {
+		out << "\t" << '\t';
+	}
+	out << tab.head;
+	out << endl;
+	for (int i = 0; i < tab.entries.size(); i++) {
+		out << tab.entries[i] << "\n";
+	}
+	return out;
 }
 
 istream& operator>>(istream& in, Table& tb) {						 //cin >> numeTabel => un nou entry in vectorul entries al clasei Table
@@ -655,6 +706,11 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				}
 				else {
 					cout << tables[position];
+					string fileName = "display_"; // alcatuim numele fisierului in care urmeaza sa scriem :D
+					fileName += to_string(displayID); // ii lipim id-ul la final
+					displayID++;
+					fileName += ".txt"; // si extensia
+					tables[position].writeToFiles(fileName.c_str()); // dupa care il scriem in fisier
 				}
 			}
 		}
@@ -979,6 +1035,14 @@ void Table::setEntries(vector<Entry> newEntries)
 {
 	if(!newEntries.empty())
 	this->entries = newEntries;
+}
+
+void Table::writeToFiles(const char* fileName) {
+	ofstream f(fileName);
+	if (!f.good()) {
+		return;
+	}
+	f << *this;
 }
 
 //---------------------------------> ENTRY CLASS <-------------------------------------
