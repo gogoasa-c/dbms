@@ -1036,6 +1036,7 @@ void Table::writeToFiles(const char* fileName) {
 		return;
 	}
 	f << *this;
+	f.close();
 }
 
 //---------------------------------> ENTRY CLASS <-------------------------------------
