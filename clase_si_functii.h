@@ -166,6 +166,8 @@ int identify_command_type(string*, vector<Table>&);	//functia principala care fa
 void menu(int&, char* []);
 bool fileExists(char*);
 
-void write_headers_to_binary_file(fstream&, vector<Table>&);		//scrie capetele de tabel
+void write_headers_to_binary_file(fstream&, vector<Table>&);		//scrie capetele de tabel (si numele tabelelor)
 void write_content_to_binary_file(fstream&, vector<Table>&);		//scrie continutul propriu-zis al tabelelor
+void read_headers_from_binary_file(fstream&, vector<Table>&);
+void read_content_from_binary_file(fstream&, vector<Table>&);
 

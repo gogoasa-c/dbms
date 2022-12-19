@@ -948,12 +948,22 @@ void menu(int& argsc, char* argsv[]) {
 	
 	fstream f1, f2;
 
-	//f1.open("headers-in-binary.txt", ios::in | ios::binary);
-	//f2.open("content-in-binary.txt", ios::in | ios::binary);
-	////implementare citire din aceste fisiere in baza noastra de date
-	//f1.close(); f2.close();
+	f1.open("headers-in-binary.txt", ios::in | ios::binary);
+	if (f1.is_open())
+		read_headers_from_binary_file(f1, db->getTables());
+	else
+		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+	f1.close();
 
-	cout << "Beta 1.0\n";
+	f2.open("content-in-binary.txt", ios::in | ios::binary);
+	if (f2.is_open())
+		read_content_from_binary_file(f2, db->getTables());
+	else
+		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+	f2.close();
+
+	
+	cout << "Beta 2.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 	db->readFromFiles(argsc, argsv);
 	while (true) {
@@ -962,12 +972,19 @@ void menu(int& argsc, char* argsv[]) {
 			break;//FUNCTIONEAZA
 	}
 
+
 	f1.open("headers-in-binary.txt", ios::out | ios::trunc | ios::binary);
-	write_headers_to_binary_file(f1, db->getTables());
+	if (f1.is_open())
+		write_headers_to_binary_file(f1, db->getTables());	
+	else
+		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
 	f1.close();
 
 	f2.open("content-in-binary.txt", ios::out | ios::trunc | ios::binary);
-	write_content_to_binary_file(f2, db->getTables());
+	if (f2.is_open())
+		write_content_to_binary_file(f2, db->getTables());
+	else
+		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
 	f2.close();
 }
 
@@ -1265,12 +1282,100 @@ void write_content_to_binary_file(fstream& f, vector<Table>& t)
 	}
 }
 
-//void write_headers_to_binary_file(fstream& f, vector<Table>& t)
-//{
-//
-//}
-//
-//void write_content_to_binary_file(fstream& f, vector<Table>& t)
-//{
-//
-//}
+void read_headers_from_binary_file(fstream& f, vector<Table>& t)
+{
+	//ex vizionat in text:
+	//2 lungime_nume_tabel_1(=9) angajati 2 lungime_string(=5) nume lungime_string(=5) text 20 lungime_string(=1) 0 lungime_string salariu lungime_string int 10 lungime_string 0
+	//		lungime_nume_tabel_2 firme 2 lungime_string cui lungime_string text 6 lungime_string 0 lungime_string capital lungime_string int 30 lungime_string 0
+	//see write_headers_to_binary_file for more info regarding format and such
+	
+	//deoarece codul este extrem de haotic gasesc rezonabil sa citesc din fisierul binar intr-un string* pe care sa-l pasez functiei ce interpreteaza comenzi
+	//de parca aceasta ar fi fost pass-ata de la consola. O alta optiune ar fi fost folosirea de constructori si metode, insa odata incercata te loveste realitatea
+
+	int nrTables;
+	int nrColumns;	//nr de coloane a unei tabele la un moment dat
+	int length;		//lungimea unui vector de diferite tipuri care trebuie citit
+	int commandLength; //the length of the i-th command
+	int dataSize;	//will hold dataSize[i][j] of i table and j column
+	int number;
+	int z;			//contor that is used to keep count on when we reach the 3rd element of the header which is int and not string
+					//so we give it a different treatment when reading from file and interpreting the data that was read
+	string str;		//string auxiliar urmand a fi folosit pentru diferite citiri
+	string* command = NULL; //create table t nume text 10 0 salariu int 6 0 urmand a fi pasat lui identify_command_type
+
+	f.read((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {	
+		f.read((char*)&length, sizeof(int));
+		char* buffer = new char[length];
+		f.read(buffer, length);
+		str = buffer;
+		delete[] buffer;
+		f.read((char*)&nrColumns, sizeof(int));
+		commandLength = 4 + nrColumns * 4;		//primele 4 sunt nr de argumente, create, table, nume_tabela
+		command = new string[commandLength]; 
+		number = commandLength - 1;
+		command[0] = to_string(number);
+		command[1] = "create";
+		command[2] = "table";
+		command[3] = str;
+
+		z = 0;
+		for (int j = 0; j < nrColumns*4; j++) {
+			z++;
+			if (z == 3) {
+				z = -1;
+				f.read((char*)&dataSize, sizeof(int));
+				command[j + 4] = to_string(dataSize);
+				continue;
+			}
+			f.read((char*)&length, sizeof(int));
+			char* buffer = new char[length];
+			f.read(buffer, length);
+			command[j + 4] = buffer;
+			delete[] buffer;
+		}
+		
+		identify_command_type(command, t); //identify_command_type(.,.) also does DELETE[] command;; doing it twice will cause undefined behaviour
+	}
+}
+
+void read_content_from_binary_file(fstream& f, vector<Table>& t)
+{
+	//ex vizionat in text:
+	//4 3 lungime_string(=9) Valentin lungime_string(=5) 1000 lungime_string(=9) Cristian lungime_string(=5) 2000 lungime_string(=7) Teodor lungime_string(=5) 3000 0 7 lungime_string mar 
+	//		lungime_string banana lungime_string para lungime_string mandarina lungime_string portocala lungime_string nectarina lungime_string gutuie 0
+	//see write_content_to_binary_filefor more info regarding format and such eventual si read_headers_...
+
+	int nrTables;
+	int nrEntries;
+	int nrColumns; //numberArguments from class Entry of i-th table
+	int length;		//lungimea unui vector de diferite tipuri care trebuie citit
+	int commandLength; //the length of the i-th command
+	int number;
+	string str;		//string auxiliar urmand a fi folosit pentru diferite citiri
+	string* command = NULL; //insert into t values Adrian, 1000 urmand a fi pasat lui identify_command_type
+
+	f.read((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {
+		f.read((char*)&nrEntries, sizeof(int));
+		nrColumns = t[i].getHeader().getTableHead().size();
+		for (int j = 0; j < nrEntries; j++) {
+			commandLength = 5 + nrColumns;
+			command = new string[commandLength];
+			number = commandLength - 1;
+			command[0] = to_string(number);
+			command[1] = "insert";
+			command[2] = "into";
+			command[3] = t[i].getName();
+			command[4] = "values";
+			for (int k = 0; k < nrColumns; k++) {
+				f.read((char*)&length, sizeof(int));
+				char* buffer = new char[length];
+				f.read(buffer, length);
+				command[k + 5] = buffer;
+				delete[] buffer;
+			}
+			identify_command_type(command, t); //this function also does delete[] command
+		}
+	}
+}
