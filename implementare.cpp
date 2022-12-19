@@ -938,6 +938,24 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				cout << "\nTabel inexistent!\n";
 			}
 		}
+		else if (word[1] == "import") {		// IMPORT nume_tabela nume_fisier.CSV
+			string tableName = word[2];
+			int pozTable = -1;
+			if (TableExists(tableName, tables, pozTable)) {
+				string CsvFileName = word[3];
+				char* str = new char[CsvFileName.length() + 1];
+				if (fileExists(str))
+				{
+					
+				}
+				else {
+					cout << "\nFisier inexistent!\n";
+				}
+			}
+			else {
+				cout << "\nTabel inexistent!\n";
+			}
+		}
 		delete[] word;
 		return 1;
 	}
@@ -964,6 +982,17 @@ void menu(int& argsc, char* argsv[]) {
 	}
 	f2.close();
 
+	fstream f3; // CSV FILE
+
+	f3.open("CSV_FILE.csv");
+	if (f3.is_open()) {
+		readFromCsvFiles(f3, db->getTables());
+	}
+	else {
+		cout << "\nCSV_FILE.csv doesn't exist in the program path and therefore will be created at the end of execution in order to load data\n";
+	}
+	f3.close(); // WORKS
+
 	
 	cout << "Beta 2.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
@@ -973,7 +1002,6 @@ void menu(int& argsc, char* argsv[]) {
 		if (aux == 0)
 			break;//FUNCTIONEAZA
 	}
-
 
 	f1.open("headers-in-binary.txt", ios::out | ios::trunc | ios::binary);
 	if (f1.is_open())
@@ -1380,4 +1408,68 @@ void read_content_from_binary_file(fstream& f, vector<Table>& t)
 			identify_command_type(command, t); //this function also does delete[] command
 		}
 	}
+}
+
+void readFromCsvFiles(fstream& f, vector<Table>& t) {
+	
+			ifstream f3("CSV_FILE.csv");
+
+			if (!f3.is_open())
+			{
+				cout << "\nCSV File failed to open!\n";
+			}
+
+			string name;
+			int salary;
+
+			string String;
+			string line;
+
+			while (getline(f, line)) {
+				stringstream ss(line);
+				getline(ss, name, ',');
+				getline(ss, String, ',');
+				salary = stoi(String);
+				cout << "\nName: " << name << " | " << "Salary: " << salary;
+			}
+			cout << "\n\n";
+
+			f3.close();
+
+}
+
+//void import_csv_file_to_table(fstream& f, vector<Table>& t, vector<string>& inputs) {
+//
+//	ifstream CSV_FILE;
+//	CSV_FILE.open("CSV_FILE.csv");
+//
+//	if (!CSV_FILE.is_open())
+//	{
+//		cout << "\nCSV File failed to open!\n";
+//	}
+//
+//	string name;
+//	int salary;
+//
+//	string String;
+//	string line;
+//
+//	while (getline(f, line)) {
+//		stringstream InputString(line);
+//		getline(InputString, name, ',');
+//		inputs.push_back(line);
+//		getline(InputString, String, ',');
+//		salary = stoi(String);
+//		inputs.push_back(line);
+//	}
+//
+//	CSV_FILE.close();
+//}
+
+void import_data_from_csv_file_to_existing_table(fstream& f, vector<Table>& t) {
+
+	fstream f3;
+	Database* db = db->getInstance();
+
+	readFromCsvFiles(f3, db->getTables());
 }

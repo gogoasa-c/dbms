@@ -8,6 +8,7 @@
 #include <iomanip> //pt select setw(dimensiune) sa se afiseze frumos (seteaza "weight"-ul cout-urilor, adica le forteaza sa afiseze un anumit numar de caractere)
 #include <fstream>
 #include <filesystem>
+#include <sstream>
 using namespace std;
 
 
@@ -144,7 +145,7 @@ public:
 	vector<Table> getTablesNoRef();
 	void setTables(vector<Table>);
 
-	void readFromFiles(int&, char* []); // citire din fisiere
+	void readFromFiles(int&, char* []); // citire din fisiere txt
 };
 
 bool isNumber(string);
@@ -171,3 +172,5 @@ void write_content_to_binary_file(fstream&, vector<Table>&);		//scrie continutul
 void read_headers_from_binary_file(fstream&, vector<Table>&);
 void read_content_from_binary_file(fstream&, vector<Table>&);
 
+void readFromCsvFiles(fstream&, vector<Table>&); // citire din fisiere csv
+void import_data_from_csv_file_to_existing_table(fstream&, vector<Table>&);
