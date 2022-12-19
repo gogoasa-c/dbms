@@ -69,6 +69,16 @@ Header::~Header() {
 
 }
 
+void Header::writeToFiles(const char* fileName) {
+	ofstream f(fileName);
+	if (!f.good()) {
+		return;
+	}
+	f << *this;
+	f.close();
+}
+
+
 Entry::Entry(const Entry& e) {
 	this->numberArguments = e.numberArguments;
 	this->arguments = new string[this->numberArguments];
@@ -740,9 +750,15 @@ int identify_command_type(string* word, vector<Table>& tables) {
 						bool colExists = columnExists(word[6], tabHeads, colPosition); // verificam daca exista coloana
 						if (colExists) { // daca exista 
 							cout << tables[position].head; // dam output la capul de tabel
+							string fileName = "select_"; // alcatuim numele fisierului in care urmeaza sa scriem :D
+							fileName += to_string(selectID); // ii lipim id-ul la final
+							selectID++;
+							fileName += ".txt"; // si extensia
+							tables[position].head.writeToFiles(fileName.c_str());
 							for (int i = 0; i < tables[position].getEntries().size(); i++) { // si dupa cautam sa dam match intre valoare de pe coloana respectiva si valoarea introdusa de la tastatura
 								if (tables[position].getEntries()[i].getArguments()[colPosition] == word[8]) {
 									cout << endl << tables[position].getEntries()[i]; // cand o gasim, cout
+									tables[position].getEntries()[i].writeToFiles(fileName.c_str());
 								}
 							}
 						}
@@ -753,6 +769,11 @@ int identify_command_type(string* word, vector<Table>& tables) {
 					} // daca nu e cu where ii dam direct print
 					else {
 						cout << tables[position];
+						string fileName = "select_"; // alcatuim numele fisierului in care urmeaza sa scriem :D
+						fileName += to_string(selectID); // ii lipim id-ul la final
+						selectID++;
+						fileName += ".txt"; // si extensia
+						tables[position].writeToFiles(fileName.c_str()); // dupa care il scriem in fisier
 					}
 				}
 				else {
@@ -788,6 +809,13 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				int tablePosition = -1; // incepem cu poz -1 ca mai sus la insert
 				bool exists = TableExists(word[fromPosition+1], tables, tablePosition); // gasim tabelul din care afisam
 				if (exists) { // daca exista tabelul sa vedem daca coloanele sunt in el :D
+					string fileName = "select_"; // alcatuim numele fisierului in care urmeaza sa scriem :D
+					fileName += to_string(selectID); // ii lipim id-ul la final
+					selectID++;
+					fileName += ".txt"; // si extensia
+					//implementare mai rapciugoasa dar ar fi mai mare durerea de cap sa fac cu inheritance
+					ofstream fileOutput(fileName.c_str()); // am deschis fisierul
+					
 					vector<string> tabHeads = tables[tablePosition].head.getTableHead(); // copiem capul de tabel cu numele doar
 					vector<int> columnPositions; // aici tinem pozitiile coloanelor cand le gasim
 					for (int i = 2; i < fromPosition; i++) { // vedem despre ce coloane e vorba
@@ -802,37 +830,49 @@ int identify_command_type(string* word, vector<Table>& tables) {
 						}
 					}
 					cout << endl;
+					fileOutput << endl;
 					for(int i=0; i<columnPositions.size(); i++){
 						cout << "++++++++++++++++++++++";
+						fileOutput << "++++++++++++++++++++++";
 					}
 					cout << endl;
+					fileOutput << endl;
 					for (int i = 0; i < columnPositions.size(); i++) { // aici vreau sa afisez capetele de tabel (doar numele lor)
-						ios init(NULL); // dar nu stiu de ce nu merge sa-mi afiseze ce trebuie. nu am timp sa figure it out myself. daca puteti sa debug voi ar fi gr8
+						ios init(NULL); 
 						init.copyfmt(cout);
 						cout << setw(15);
+						fileOutput << setw(15);
 						cout << tables[tablePosition].head.getTableHead()[columnPositions[i]] << "\t\t";
+						fileOutput << tables[tablePosition].head.getTableHead()[columnPositions[i]] << "\t\t";
 						cout.copyfmt(init);
-					
+						fileOutput.copyfmt(init);
 					}
 					cout << endl;
+					fileOutput << endl;
 					for (int i = 0; i < columnPositions.size(); i++) {
 						cout << "++++++++++++++++++++++"; // afisaj frumos
+						fileOutput << "++++++++++++++++++++++";
 					}
 					cout << endl;
+					fileOutput << endl;
 					if(wherePosition == -1){
 						for (int j = 0; j < tables[tablePosition].entries.size(); j++) { // pentru fiecare entry
 							for (int i = 0; i < columnPositions.size(); i++) { // aici trecem prin vectorul cu pozitiile coloanelor si afisam coloanele
 								ios init(NULL);
 								init.copyfmt(cout);
 								cout << setw(15);
+								fileOutput << setw(15);
 								cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
+								fileOutput << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
 								cout.copyfmt(init);
+								fileOutput.copyfmt(init);
 
 							} // tables[tablePositions] = tabelul curent
 							//.entries = intram in vectorul entries
 							//[j] ca luam al j-lea entry ca facem for-ul exterior cu j pe vectorul de entries
 							// .getArguments() = .arguments[columnPositions[i]] pentru ca pozitiile coloanelor sunt actually in columnPositions
 							cout << endl;
+							fileOutput << endl;
 						}
 					}
 					else {
@@ -849,14 +889,18 @@ int identify_command_type(string* word, vector<Table>& tables) {
 									ios init(NULL);
 									init.copyfmt(cout);
 									cout << setw(15);
+									fileOutput << setw(15);
 									cout << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
+									fileOutput << tables[tablePosition].entries[j].getArguments()[columnPositions[i]] << "\t\t";
 									cout.copyfmt(init);
+									fileOutput.copyfmt(init);
 									afisat = true;
 								}
 
 							}
 							if(afisat){
 								cout << endl;
+								fileOutput << endl;
 							}
 						}
 					}
@@ -1120,6 +1164,15 @@ void Entry::setArguments(int newNumberArguments, string* newArguments)
 	{
 		cout << e.what();
 	}
+}
+
+void Entry::writeToFiles(const char* fileName) {
+	ofstream f(fileName, ios::app);
+	if (!f.good()) {
+		return;
+	}
+	f << endl << *this;
+	f.close();
 }
 
 void take_user_input_from_file(ifstream& f, vector<string>& inputs) { // crapa aici in functie momentan 
