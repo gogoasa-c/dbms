@@ -706,7 +706,7 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				int position = -1;
 				bool exists = TableExists(word[3], tables, position);
 				if (!exists) {
-					cout << "\nNu exista tabelul " << word[3];
+					cout << "\nNu exista tabelul " << word[3] << endl;
 				}
 				else {
 					cout << tables[position];
@@ -951,15 +951,17 @@ void menu(int& argsc, char* argsv[]) {
 	f1.open("headers-in-binary.txt", ios::in | ios::binary);
 	if (f1.is_open())
 		read_headers_from_binary_file(f1, db->getTables());
-	else
-		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+	else {
+		cout << "\nheaders-in-binary.txt doesn't exists in the program path and therefore will be created at the end of execution in order to load data\n";
+	}
 	f1.close();
 
 	f2.open("content-in-binary.txt", ios::in | ios::binary);
 	if (f2.is_open())
 		read_content_from_binary_file(f2, db->getTables());
-	else
-		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+	else {
+		cout << "\ncontent-in-binary.txt doesn't exists in the program path and therefore will be created at the end of execution in order to load data\n";
+	}
 	f2.close();
 
 	
@@ -977,14 +979,14 @@ void menu(int& argsc, char* argsv[]) {
 	if (f1.is_open())
 		write_headers_to_binary_file(f1, db->getTables());	
 	else
-		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path. If yes, check if you have permisions\n";
 	f1.close();
 
 	f2.open("content-in-binary.txt", ios::out | ios::trunc | ios::binary);
 	if (f2.is_open())
 		write_content_to_binary_file(f2, db->getTables());
 	else
-		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path\n";
+		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path. If yes, check if you have permisions\n";
 	f2.close();
 }
 
