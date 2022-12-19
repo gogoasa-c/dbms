@@ -21,7 +21,7 @@ class readFromFile {
 	virtual void readFromFiles(int&, char* []) = 0;
 };
 
-class Header {
+class Header : writeToFile {
 	vector<string> tableHead;
 	vector<string> dataType;
 	vector<int> dataSize;
@@ -38,6 +38,8 @@ public:
 	void setDataSize(vector<int> newDataSize);
 	void setImplicitValue(vector<string> newImplicitValue);
 
+	void writeToFiles(const char*);
+
 	int getNrColumns();
 	vector<string> getTableHead();
 	vector<string> getDataType();
@@ -52,7 +54,7 @@ public:
 	~Header();
 };
 
-class Entry {//clasa entry care va constitui un vector<Entry> entries in clasa Table
+class Entry : writeToFile {//clasa entry care va constitui un vector<Entry> entries in clasa Table
 	int numberArguments;//numar argumente
 	string* arguments;//vector de string-uri alocat dinamic
 public:
@@ -77,6 +79,8 @@ public:
 	void setArguments(int newNumberArguments, string* newArguments);
 
 	//----------------------------------------------------------------------
+
+	void writeToFiles(const char*);
 
 	friend ostream& operator<< (ostream&, const Entry&);
 
