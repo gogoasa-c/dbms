@@ -51,6 +51,8 @@ public:
 
 	friend ofstream& operator <<(ofstream&, const Header&);
 
+	friend ifstream& operator>>(ifstream&, Header&);
+
 	~Header();
 };
 
@@ -86,6 +88,8 @@ public:
 
 	friend ofstream& operator<< (ofstream&, const Entry&);
 
+	friend ifstream& operator>>(ifstream&, Entry&);
+
 	~Entry();
 };
 
@@ -119,6 +123,7 @@ public:
 	vector<Entry> getEntries();
 	vector<Entry>& getRefEntries();
 	Header getHeader();
+	Header& getHeaderRef();
 	
 	// SET
 	void setName(string newName);
@@ -177,4 +182,5 @@ void read_headers_from_binary_file(fstream&, vector<Table>&);
 void read_content_from_binary_file(fstream&, vector<Table>&);
 
 void readFromCsvFiles(fstream&, vector<Table>&); // citire din fisiere csv
-void import_data_from_csv_file_to_existing_table(fstream&, vector<Table>&);
+void import_data_from_csv_file_to_existing_table(ifstream&, vector<Table>&, int);
+string* split_string_into_words_comma(string);

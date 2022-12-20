@@ -1,9 +1,12 @@
 
-		tabel		
+		t		
 ++++++++++++++++++++++++++++++++++++++++++++
 nume|text|10|0	salariu|int|6|0	
 ++++++++++++++++++++++++++++++++++++++++++++
          adrian		1000		
-       cristian		5000		
-        askdafm		4000		
-        altnume		4000		
+         adrian		2000		
+         marian		3000		
+        jigdsfg		3000		
+        dsadsad		3000		
+       cristian		4000		
+           dian		5000		

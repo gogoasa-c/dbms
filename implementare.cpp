@@ -319,6 +319,44 @@ ofstream& operator <<(ofstream& out, const Header& head) {
 	return out;
 }
 
+ifstream& operator>>(ifstream& in, Header& h) {
+	string line;
+
+	getline(in, line);
+	stringstream ssHeader(line);
+	
+	string aux_str;
+	while (getline(ssHeader, aux_str, ','))
+	{
+		h.tableHead.push_back(aux_str);
+	}
+
+	getline(in, line);
+	stringstream ssDataType(line);
+
+	while (getline(ssDataType, aux_str, ','))
+	{
+		h.dataType.push_back(aux_str);
+	}
+
+	getline(in, line);
+	stringstream ssDataSize(line);
+
+	while (getline(ssDataSize, aux_str, ','))
+	{
+		h.dataSize.push_back(stoi(aux_str));
+	}
+
+	getline(in, line);
+	stringstream ssImplicitValue(line);
+
+	while (getline(ssImplicitValue, aux_str, ','))
+	{
+		h.implicitValue.push_back(aux_str);
+	}
+	return in;
+}
+
 ostream& operator<< (ostream& out, const Header& head) {
 	out << endl;
 	for (int i = 0; i < head.tableHead.size(); i++) {
@@ -362,6 +400,21 @@ ofstream& operator<< (ofstream& out, const Entry& ent) {
 
 	cout.copyfmt(init);
 	return out;
+}
+
+ifstream& operator>>(ifstream& in, Entry& e) {
+	string line;
+
+	getline(in, line);
+	stringstream ssEntry(line);
+
+	string aux_str;
+	int i = 0;
+	while (getline(ssEntry, aux_str, ','))
+	{
+		e.arguments[i++]=aux_str; // post-incrementare
+	}
+	return in;
 }
 
 ostream& operator<<(ostream& out, const Table& tab) { //afisaj tabel
@@ -571,6 +624,10 @@ bool isFloatingPoint(string s) {
 
 bool no_missing_arguments(string* word) {
 	try{
+		if (word[1] == "import")
+		{
+			return true;
+		}
 		if (stoi(word[0]) < 3 && word[1] != "exit") {
 			exception* e = new exception("\nNu exista nicio comanda cu structura introdusa!");
 			throw e;
@@ -666,7 +723,7 @@ bool no_missing_arguments(string* word) {
 				return false;
 			}
 		}
-		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert" && word[1] != "delete" && word[1] != "update") {
+		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert" && word[1] != "delete" && word[1] != "update" && word[1] != "import") {
 			exception* e = new exception("\nComanda inexistenta!\n");
 			throw e;
 			return false;
@@ -988,8 +1045,14 @@ int identify_command_type(string* word, vector<Table>& tables) {
 			if (TableExists(tableName, tables, pozTable)) {
 				string CsvFileName = word[3];
 				char* str = new char[CsvFileName.length() + 1];
+				for (int i = 0; i < CsvFileName.length() + 1; i++)
+				{
+					str[i] = CsvFileName[i];
+				}
 				if (fileExists(str))
 				{
+					ifstream f(str);
+					import_data_from_csv_file_to_existing_table(f, tables, pozTable);
 					
 				}
 				else {
@@ -1103,6 +1166,11 @@ vector<Entry>& Table::getRefEntries()
 }
 
 Header Table::getHeader()
+{
+	return this->head;
+}
+
+Header& Table::getHeaderRef()
 {
 	return this->head;
 }
@@ -1484,7 +1552,6 @@ void readFromCsvFiles(fstream& f, vector<Table>& t) {
 				getline(ss, name, ',');
 				getline(ss, String, ',');
 				salary = stoi(String);
-				cout << "\nName: " << name << " | " << "Salary: " << salary;
 			}
 			cout << "\n\n";
 
@@ -1492,38 +1559,124 @@ void readFromCsvFiles(fstream& f, vector<Table>& t) {
 
 }
 
-//void import_csv_file_to_table(fstream& f, vector<Table>& t, vector<string>& inputs) {
-//
-//	ifstream CSV_FILE;
-//	CSV_FILE.open("CSV_FILE.csv");
-//
-//	if (!CSV_FILE.is_open())
-//	{
-//		cout << "\nCSV File failed to open!\n";
-//	}
-//
-//	string name;
-//	int salary;
-//
-//	string String;
-//	string line;
-//
-//	while (getline(f, line)) {
-//		stringstream InputString(line);
-//		getline(InputString, name, ',');
-//		inputs.push_back(line);
-//		getline(InputString, String, ',');
-//		salary = stoi(String);
-//		inputs.push_back(line);
-//	}
-//
-//	CSV_FILE.close();
-//}
+void import_data_from_csv_file_to_existing_table(ifstream& f, vector<Table>& t, int poz) {
 
-void import_data_from_csv_file_to_existing_table(fstream& f, vector<Table>& t) {
+	string aux;
+	int nrArguments = t[poz].getHeader().getNrColumns();
+	string final;
+	
+	while (getline(f, aux))
+	{
 
-	fstream f3;
-	Database* db = db->getInstance();
+		int nrArgTotal = 0;
+		string* command = split_string_into_words_comma(aux);
+		string aux2;
 
-	readFromCsvFiles(f3, db->getTables());
+		nrArgTotal += stoi(command[0]) + 4;
+		final += to_string(nrArgTotal);
+		final += ",insert,into,table,values";
+		for (int i = 1; i <= stoi(command[0]); i++)
+		{
+			aux2 += ",";
+			aux2 += command[i];
+		}
+		final += aux2;
+
+		delete[] command;
+
+		/*stringstream ss(final);
+		command = new string[stoi(final)];*/
+
+		command = split_string_into_words_comma(final);
+		t[poz].addEntry(nrArguments, command, t[poz]);
+		delete[] command;
+	}
+}
+
+string* split_string_into_words_comma(string userInput)
+{
+	if (userInput == "invalid") {
+		return nullptr;
+	}
+	int controlSize = 100;											//controlam size-ul array-ului de string alocat dinamic
+	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter ;; word[index] = ""
+	string* aux = NULL;
+	int i, numberWords = 0, k;										//i = initial contor apoi index pt a cata litera din string ;; numberWords = index pt al catelea cuvant formam ;; k = index similar lui numberWords dar folosim pt resize de word prin ajutorul lui aux 
+	word[0] = to_string(numberWords);								//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
+	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
+	for (i = 0; i < userInput.size(); i++) {
+		if (userInput[i] != ',') {
+			startedTyping++;
+		}
+		if (startedTyping) {										//adica != 0
+			numberWords++;											//odata ce nu avem space-uri, se ajunge la primul cuvant, apoi al doilea si tot asa
+			word[0] = to_string(numberWords);						//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
+			if (numberWords >= controlSize) {						//pentru alocare dinamica
+				string* aux = new string[controlSize];
+				for (k = 0; k < controlSize; k++) {
+					aux[k] = word[k];
+				}
+				controlSize += 100;
+				delete[] word;
+				word = new string[controlSize];
+				for (k = 0; k < controlSize - 100; k++) {
+					word[k] = aux[k];
+				}
+			}
+			while (userInput[i] != ',' && i < userInput.size()) {
+				word[numberWords] += userInput[i++];				//cat timp nu avem space-uri, adugam literele la cuvantul numberWords pt a forma intregul argument cuvant[numberWords]
+			}
+			startedTyping = 0;										//s-a ajuns la space, astfel ca incetam tastarea/adugarea argumentului trecut si trecem mai departe
+		}
+	}
+
+	//!!!NU UITAM SA DEZALOCAM MEMORIA DUPA CE NU MAI AVEM NEVOIE DE VECTORUL DE CUVINTE!!!
+
+	//delete[] word													//asta se va face probabil in constructorii din clasele care isi creaza metodele pe baza argumentelor functiilor sql
+	delete[] aux;
+	return word;
+}
+
+string* split_string_into_words_comma(string userInput)
+{
+	if (userInput == "invalid") {
+		return nullptr;
+	}
+	int controlSize = 100;											//controlam size-ul array-ului de string alocat dinamic
+	string* word = new string[controlSize];							//nota: pt introducerea din fisiere, comenzile for vi despartite intre ele prin enter ;; word[index] = ""
+	string* aux = NULL;
+	int i, numberWords = 0, k;										//i = initial contor apoi index pt a cata litera din string ;; numberWords = index pt al catelea cuvant formam ;; k = index similar lui numberWords dar folosim pt resize de word prin ajutorul lui aux 
+	word[0] = to_string(numberWords);								//!!!ATENTIE!!! cuvant[0] va tine NR DE CUVINTE (pt a folosi in alocari dinamice vom folosi **stoi(cuvant[0])**
+	unsigned int startedTyping = 0;									//ne ajuta sa ignoram multiple space-uri, pt a nu da eroare usor
+	for (i = 0; i < userInput.size(); i++) {
+		if (userInput[i] != ',') {
+			startedTyping++;
+		}
+		if (startedTyping) {										//adica != 0
+			numberWords++;											//odata ce nu avem space-uri, se ajunge la primul cuvant, apoi al doilea si tot asa
+			word[0] = to_string(numberWords);						//word[0] = "5". stoi(word[5] == int 5); IMPORTANT! vom folosi valoarea stocata la word[0] pt a sti cate argumente avem. daca sunt 5, argumentele se vor afla pe pozitiile interval [1, 5]
+			if (numberWords >= controlSize) {						//pentru alocare dinamica
+				string* aux = new string[controlSize];
+				for (k = 0; k < controlSize; k++) {
+					aux[k] = word[k];
+				}
+				controlSize += 100;
+				delete[] word;
+				word = new string[controlSize];
+				for (k = 0; k < controlSize - 100; k++) {
+					word[k] = aux[k];
+				}
+			}
+			while (userInput[i] != ',' && i < userInput.size()) {
+				word[numberWords] += userInput[i++];				//cat timp nu avem space-uri, adugam literele la cuvantul numberWords pt a forma intregul argument cuvant[numberWords]
+			}
+			startedTyping = 0;										//s-a ajuns la space, astfel ca incetam tastarea/adugarea argumentului trecut si trecem mai departe
+		}
+	}
+
+	//!!!NU UITAM SA DEZALOCAM MEMORIA DUPA CE NU MAI AVEM NEVOIE DE VECTORUL DE CUVINTE!!!
+
+	//delete[] word													//asta se va face probabil in constructorii din clasele care isi creaza metodele pe baza argumentelor functiilor sql
+	delete[] aux;
+	return word;
 }
