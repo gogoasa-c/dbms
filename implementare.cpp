@@ -1280,7 +1280,7 @@ void CommandMenu(vector<Table>& tables) {
 		{
 			cout << "\n\n*****************************GOGOASA PETRE-CRISTIAN*****************************\n";
 			cout << "*****************************GHITA VALENTIN*****************************\n";
-			cout << "*****************************IONEL TEODOR*****************************\n";
+			cout << "*****************************IONEL TEODOR DANIEL*****************************\n";
 			break;
 		}
 		default:
