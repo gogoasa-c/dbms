@@ -11,13 +11,25 @@ Database* Database::instance = nullptr;
 int selectID = 0, displayID = 0; // pt fisiere sa tinem minte care fisier e la afisarea de "Rapoarte"
 
 
-void setToVector(set<Entry> entrySet, vector<Entry>& entryVec) {
-	auto setIter = entrySet.begin();
-	entryVec.clear();
-	for (setIter; setIter != entrySet.end(); setIter++) {
-		entryVec.push_back(*setIter);
-	}
-	return;
+//void setToVector(set<Entry> entrySet, vector<Entry>& entryVec) {
+//	auto setIter = entrySet.begin();
+//	entryVec.clear();
+//	for (setIter; setIter != entrySet.end(); setIter++) {
+//		entryVec.push_back(*setIter);
+//	}
+//	return;
+//}
+//
+//void vectorToSet(set<Entry>& entrySet, vector<Entry> entryVec) {
+//	entrySet.clear();
+//	for (auto i : entryVec) {
+//		entrySet.insert(i);
+//	}
+//	return;
+//}
+
+bool Entry::operator<(const Entry& e) {
+	return this->numberArguments < e.numberArguments;
 }
 
 bool fileExists(char* name) { // verificam daca exista fisierul respectiv
@@ -201,6 +213,13 @@ set<Entry> Table::getUniqueEntries() {
 
 void Table::setUniqueEntries(set<Entry> newUniqueEntries) {
 	this->uniqueEntries = newUniqueEntries;
+}
+void Table::setUniqueEntries(vector<Entry> newUniqueEntries) {
+	this->uniqueEntries.clear();
+	for (auto i : newUniqueEntries) {
+	//	this->uniqueEntries.insert(i); problema e aici!! nu stiu ce nu ii place: posibila rezolvare inlocuim peste tot unde avem set cu unordered_set 
+	}
+	return;
 }
 
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
@@ -1153,6 +1172,8 @@ void menu(int& argsc, char* argsv[]) {
 	db->readFromFiles(argsc, argsv);
 	while (true) {
 		for (auto i : db->getTables()) {
+//			i.setUniqueEntries(i.getEntries());
+//			setToVector(i.getUniqueEntries(), i.getRefEntries());
 			if (!db->searchTableNames(i.getName())) {
 				db->addToTableNames(i.getName()); // tine minte numele tabelului in map
 				db->addToTableHistory(i);

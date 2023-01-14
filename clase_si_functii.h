@@ -71,6 +71,8 @@ public:
 	bool operator==(const Entry&);
 	void operator=(const Entry&);
 
+	bool operator<(const Entry&);
+
 	operator int();
 	//----------------------------------------------------------------------
 
@@ -134,6 +136,7 @@ public:
 	void setName(string newName);
 	void setEntries(vector<Entry> newEntries);
 	void setUniqueEntries(set<Entry> newUniqueEntries);
+	void setUniqueEntries(vector<Entry> newUniqueEntries);
 	//----------------------------------------------------------------------
 	friend ostream& operator<<(ostream&, const Table&);
 	friend istream& operator>>(istream&, Table&);
@@ -200,4 +203,5 @@ void readFromCsvFiles(fstream&, vector<Table>&); // citire din fisiere csv
 void import_data_from_csv_file_to_existing_table(ifstream&, vector<Table>&, int);
 string* split_string_into_words_comma(string);
 
-void setToVector(set<Entry> entrySet, vector<Entry>& entryVec);
+void setToVector(set<Entry>, vector<Entry>&);
+void vectorToSet(set<Entry>&, vector<Entry>);
