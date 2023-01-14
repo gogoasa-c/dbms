@@ -1305,7 +1305,7 @@ void menu(int& argsc, char* argsv[]) {
 
 	f1.open("headers-in-binary.txt", ios::in | ios::binary);
 	if (f1.is_open())
-		read_headers_from_binary_file(f1, db->getTables());
+		db->read_headers_from_binary_file(f1);
 	else {
 		cout << "\nheaders-in-binary.txt doesn't exists in the program path and therefore will be created at the end of execution in order to load data\n";
 	}
@@ -1313,7 +1313,7 @@ void menu(int& argsc, char* argsv[]) {
 
 	f2.open("content-in-binary.txt", ios::in | ios::binary);
 	if (f2.is_open())
-		read_content_from_binary_file(f2, db->getTables());
+		db->read_content_from_binary_file(f2);
 	else {
 		cout << "\ncontent-in-binary.txt doesn't exists in the program path and therefore will be created at the end of execution in order to load data\n";
 	}
@@ -1352,14 +1352,14 @@ void menu(int& argsc, char* argsv[]) {
 
 	f1.open("headers-in-binary.txt", ios::out | ios::trunc | ios::binary);
 	if (f1.is_open())
-		write_headers_to_binary_file(f1, db->getTables());	
+		db->write_headers_to_binary_file(f1);
 	else
 		cout << "\nERROR headers-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path. If yes, check if you have permisions\n";
 	f1.close();
 
 	f2.open("content-in-binary.txt", ios::out | ios::trunc | ios::binary);
 	if (f2.is_open())
-		write_content_to_binary_file(f2, db->getTables());
+		db->write_content_to_binary_file(f2);
 	else
 		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path. If yes, check if you have permisions\n";
 	f2.close();
@@ -1577,6 +1577,197 @@ void Database::readFromFiles(int& argsc, char* argsv[]) {
 			}
 
 			f.close();
+		}
+	}
+}
+
+void Database::write_headers_to_binary_file(fstream& f)
+{
+	//deoarece toate tabele existente trebuie sa aiba deja un format corespunzator, m-am gandit in fisierul binar
+	//in loc de : sizeof(vector1) data(vector1) int float sizeof(vector2) data(vector2) ... etc (formatul de la seminarul 11 de poo)
+	//sa am : int N (numar_de_tabele);; nume_tabel_1 header_1 (adica tableHead_1[j], dataType_1[j], dataSize_1[j], implicitValue_1[j]), ... nume_tabel_N header_N 
+	//(unde j este nr coloane ale tabelului la care face referinta)
+	//din moment ce oricum size-ul vectorilor stl din header au toti aceeasi marime, anume egala cu numarul de tabele existente in baza de date 
+
+	//in final rezulta ceva de genul:
+	//nr_tabele ;; nume_tabel[i] ;; nr_coloane_tabel[i] ;; header[i] ( == tableHead_[i][j], dataType_[i][j], dataSize_[i][j], implicitValue_[i][j] , unde j = nr coloane, j=[0, nr_coloane]) ;; 
+
+	//ex vizionat in text:
+	//2 lungime_nume_tabel_1(=9) angajati 2 lungime_string(=5) nume lungime_string(=5) text 20 lungime_string(=1) 0 lungime_string salariu lungime_string int 10 lungime_string 0
+	//		lungime_nume_tabel_2 firme 2 lungime_string cui lungime_string text 6 lungime_string 0 lungime_string capital lungime_string int 30 lungime_string 0
+
+	int nrTables = this->getTables().size();
+	string name;
+	string headerInfo;		//that will be tableHead, dataType or implicitValue
+	int headerDataSize;		//dataSize
+	int lenght;				//va stoca lungimile vectorilor ce urmeaza a fi scrisi in fisier in binar
+	int nrColumns;			//numarul de coloane al unui tabel la un moment dat
+
+	f.write((char*)&nrTables, sizeof(int));			//cate tabele avem in total
+
+	for (int i = 0; i < nrTables; i++) {			//pt fiecare tabel vom afisa nume, header
+		name = this->getTables()[i].getName();
+		lenght = name.size() + 1;
+		f.write((char*)&lenght, sizeof(int));
+		f.write(name.data(), lenght * sizeof(char));
+
+		nrColumns = this->getTables()[i].getHeader().getTableHead().size();
+		f.write((char*)&nrColumns, sizeof(int));
+		for (int j = 0; j < nrColumns; j++) {				//pt atatea coloane cate are tabelul, vom afisa headerul respectiv
+			//pentru tableHead
+			headerInfo = this->getTables()[i].getHeader().getTableHead()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataType
+			headerInfo = this->getTables()[i].getHeader().getDataType()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataSize
+			headerDataSize = this->getTables()[i].getHeader().getDataSize()[j];
+			f.write((char*)&headerDataSize, sizeof(int));
+			//pt implicitValue
+			headerInfo = this->getTables()[i].getHeader().getImplicitValue()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+		}
+	}
+}
+
+void Database::write_content_to_binary_file(fstream& f)
+{
+	//vom face referinta la structura tabelelor cunoscuta deja din clasa HEAD a fiecarei tabele in parte, astfel ca vom cunoaste deja lucruri esentiale, precum:
+	//nr de coloane care este egal cu numarul de argumente din entry-urile respectivei tabele (vezi clasa Table si Head)
+	//si in momentul apelarii acestei functii avel deja create tabelele cu formatul lor, insa goale, fara entry-uri
+
+	//format:
+	//nr_tabele ;; nr_entries[i] ;; entries[i][0] ... entries[i][j] ;; (unde i = nr de tabele;   j = nr entries per tabela)
+
+	//ex vizionat in text:
+	//4 3 lungime_string(=9) Valentin lungime_string(=5) 1000 lungime_string(=9) Cristian lungime_string(=5) 2000 lungime_string(=7) Teodor lungime_string(=5) 3000 0 7 lungime_string mar 
+	//		lungime_string banana lungime_string para lungime_string mandarina lungime_string portocala lungime_string nectarina lungime_string gutuie 0
+
+	int nrTables = this->getTables().size();
+	int nrEntries;									//nr of entries per table[i], where i is count for loop
+	int nrColumns;	// == Entry::numberArguments
+	int lenght;
+	int nrArguments;	//look into class Entry
+	string partOfEntry;	//holds the i-th string at the i iteration of the loop of the member string* arguments of class Entry
+
+	f.write((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {
+		nrColumns = this->getTables()[i].getHeader().getTableHead().size();
+		nrEntries = this->getTables()[i].getEntries().size();
+		f.write((char*)&nrEntries, sizeof(int));
+		for (int j = 0; j < nrEntries; j++) {
+			nrArguments = this->getTables()[i].getEntries()[j].getNumberArguments();
+			//aici se mai putea si sa scriem in fisier nr de argumente ale fiecarui entry in parte, dar deja stim ca este egal cu nr de coloane al fiecarei tabele
+			for (int k = 0; k < nrArguments; k++) {
+				lenght = this->getTables()[i].getEntries()[j].getArguments()[k].size() + 1;
+				f.write((char*)&lenght, sizeof(int));
+				partOfEntry = this->getTables()[i].getEntries()[j].getArguments()[k];
+				f.write(partOfEntry.data(), lenght * sizeof(char));
+			}
+		}
+	}
+}
+
+void Database::read_headers_from_binary_file(fstream& f)
+{
+	//ex vizionat in text:
+	//2 lungime_nume_tabel_1(=9) angajati 2 lungime_string(=5) nume lungime_string(=5) text 20 lungime_string(=1) 0 lungime_string salariu lungime_string int 10 lungime_string 0
+	//		lungime_nume_tabel_2 firme 2 lungime_string cui lungime_string text 6 lungime_string 0 lungime_string capital lungime_string int 30 lungime_string 0
+	//see write_headers_to_binary_file for more info regarding format and such
+
+	//deoarece codul este extrem de haotic gasesc rezonabil sa citesc din fisierul binar intr-un string* pe care sa-l pasez functiei ce interpreteaza comenzi
+	//de parca aceasta ar fi fost pass-ata de la consola. O alta optiune ar fi fost folosirea de constructori si metode, insa odata incercata te loveste realitatea
+
+	int nrTables;
+	int nrColumns;	//nr de coloane a unei tabele la un moment dat
+	int length;		//lungimea unui vector de diferite tipuri care trebuie citit
+	int commandLength; //the length of the i-th command
+	int dataSize;	//will hold dataSize[i][j] of i table and j column
+	int number;
+	int z;			//contor that is used to keep count on when we reach the 3rd element of the header which is int and not string
+	//so we give it a different treatment when reading from file and interpreting the data that was read
+	string str;		//string auxiliar urmand a fi folosit pentru diferite citiri
+	string* command = NULL; //create table t nume text 10 0 salariu int 6 0 urmand a fi pasat lui identify_command_type
+
+	f.read((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {
+		f.read((char*)&length, sizeof(int));
+		char* buffer = new char[length];
+		f.read(buffer, length);
+		str = buffer;
+		delete[] buffer;
+		f.read((char*)&nrColumns, sizeof(int));
+		commandLength = 4 + nrColumns * 4;		//primele 4 sunt nr de argumente, create, table, nume_tabela
+		command = new string[commandLength];
+		number = commandLength - 1;
+		command[0] = to_string(number);
+		command[1] = "create";
+		command[2] = "table";
+		command[3] = str;
+
+		z = 0;
+		for (int j = 0; j < nrColumns * 4; j++) {
+			z++;
+			if (z == 3) {
+				z = -1;
+				f.read((char*)&dataSize, sizeof(int));
+				command[j + 4] = to_string(dataSize);
+				continue;
+			}
+			f.read((char*)&length, sizeof(int));
+			char* buffer = new char[length];
+			f.read(buffer, length);
+			command[j + 4] = buffer;
+			delete[] buffer;
+		}
+
+		identify_command_type(command, this->getTables()); //identify_command_type(.,.) also does DELETE[] command;; doing it twice will cause undefined behaviour
+	}
+}
+
+void Database::read_content_from_binary_file(fstream& f)
+{
+	//ex vizionat in text:
+	//4 3 lungime_string(=9) Valentin lungime_string(=5) 1000 lungime_string(=9) Cristian lungime_string(=5) 2000 lungime_string(=7) Teodor lungime_string(=5) 3000 0 7 lungime_string mar 
+	//		lungime_string banana lungime_string para lungime_string mandarina lungime_string portocala lungime_string nectarina lungime_string gutuie 0
+	//see write_content_to_binary_filefor more info regarding format and such eventual si read_headers_...
+
+	int nrTables;
+	int nrEntries;
+	int nrColumns; //numberArguments from class Entry of i-th table
+	int length;		//lungimea unui vector de diferite tipuri care trebuie citit
+	int commandLength; //the length of the i-th command
+	int number;
+	string str;		//string auxiliar urmand a fi folosit pentru diferite citiri
+	string* command = NULL; //insert into t values Adrian, 1000 urmand a fi pasat lui identify_command_type
+
+	f.read((char*)&nrTables, sizeof(int));
+	for (int i = 0; i < nrTables; i++) {
+		f.read((char*)&nrEntries, sizeof(int));
+		nrColumns = this->getTables()[i].getHeader().getTableHead().size();
+		for (int j = 0; j < nrEntries; j++) {
+			commandLength = 5 + nrColumns;
+			command = new string[commandLength];
+			number = commandLength - 1;
+			command[0] = to_string(number);
+			command[1] = "insert";
+			command[2] = "into";
+			command[3] = this->getTables()[i].getName();
+			command[4] = "values";
+			for (int k = 0; k < nrColumns; k++) {
+				f.read((char*)&length, sizeof(int));
+				char* buffer = new char[length];
+				f.read(buffer, length);
+				command[k + 5] = buffer;
+				delete[] buffer;
+			}
+			identify_command_type(command, this->getTables()); //this function also does delete[] command
 		}
 	}
 }

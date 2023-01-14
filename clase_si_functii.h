@@ -14,7 +14,15 @@
 #include <set>
 using namespace std;
 
+class writeBinaryToFile {
+	virtual void write_headers_to_binary_file(fstream&) = 0;
+	virtual void write_content_to_binary_file(fstream&) = 0;
+};
 
+class readBineryFromFile {
+	virtual void read_headers_from_binary_file(fstream&) = 0;
+	virtual void read_content_from_binary_file(fstream&) = 0;
+};
 
 class writeToFile {
 	virtual void writeToFiles(const char*) = 0;
@@ -173,6 +181,10 @@ public:
 	void addToTableHistory(Table);
 
 	void readFromFiles(int&, char* []); // citire din fisiere txt
+	void write_headers_to_binary_file(fstream&);	//scrie capetele de tabel (si numele tabelelor)
+	void write_content_to_binary_file(fstream&);	//scrie continutul propriu-zis al tabelelor
+	void read_headers_from_binary_file(fstream&);
+	void read_content_from_binary_file(fstream&);
 };
 
 bool isNumber(string);
@@ -195,8 +207,8 @@ void menu(int&, char* []);
 bool fileExists(char*);
 void CommandMenu(vector<Table>&);
 
-void write_headers_to_binary_file(fstream&, vector<Table>&);		//scrie capetele de tabel (si numele tabelelor)
-void write_content_to_binary_file(fstream&, vector<Table>&);		//scrie continutul propriu-zis al tabelelor
+void write_headers_to_binary_file(fstream&, vector<Table>&);		
+void write_content_to_binary_file(fstream&, vector<Table>&);
 void read_headers_from_binary_file(fstream&, vector<Table>&);
 void read_content_from_binary_file(fstream&, vector<Table>&);
 
