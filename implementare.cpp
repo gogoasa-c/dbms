@@ -11,6 +11,15 @@ Database* Database::instance = nullptr;
 int selectID = 0, displayID = 0; // pt fisiere sa tinem minte care fisier e la afisarea de "Rapoarte"
 
 
+void setToVector(set<Entry> entrySet, vector<Entry>& entryVec) {
+	auto setIter = entrySet.begin();
+	entryVec.clear();
+	for (setIter; setIter != entrySet.end(); setIter++) {
+		entryVec.push_back(*setIter);
+	}
+	return;
+}
+
 bool fileExists(char* name) { // verificam daca exista fisierul respectiv
 	ifstream f(name); // .c_str transforma std::string-ul in char*
 	return f.good();
@@ -182,6 +191,18 @@ Table::~Table() {
 	
 }
 
+set<Entry> Table::getUniqueEntries() {
+	return this->uniqueEntries;
+}
+
+//set<Entry>& Table::getRefUniqueEntries() {
+//	return &this->uniqueEntries;
+//}
+
+void Table::setUniqueEntries(set<Entry> newUniqueEntries) {
+	this->uniqueEntries = newUniqueEntries;
+}
+
 void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 	try{//insert into table_name values((col1, col2, col3), (col11, col12, col13), ...)
 		if ((stoi(arguments[0]) - 4) % table.head.getNrColumns() != 0) {
@@ -211,6 +232,7 @@ void Table::addEntry(int numberArguments, string* arguments, Table& table) {
 			
 			Entry* ent = new Entry(table.head.getNrColumns(), aux);
 			table.entries.push_back(*ent);
+			//table.entries.insert(*ent);
 			delete[] aux;
 		}
 	}

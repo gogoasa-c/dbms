@@ -11,6 +11,7 @@
 #include <sstream>
 #include <map>
 #include <list>
+#include <set>
 using namespace std;
 
 
@@ -101,7 +102,7 @@ class Table : writeToFile{
 	string name;//nume tabel
 	Header head;
 	vector<Entry> entries;//vector de entries unde stocam inregistrarile :D
-
+	set<Entry> uniqueEntries;
 public:
 	Table();
 	Table(string* word);
@@ -124,12 +125,15 @@ public:
 	string getName();
 	vector<Entry> getEntries();
 	vector<Entry>& getRefEntries();
+	set<Entry> getUniqueEntries();
+//	set<Entry>& getRefUniqueEntries();
 	Header getHeader();
 	Header& getHeaderRef();
 	
 	// SET
 	void setName(string newName);
 	void setEntries(vector<Entry> newEntries);
+	void setUniqueEntries(set<Entry> newUniqueEntries);
 	//----------------------------------------------------------------------
 	friend ostream& operator<<(ostream&, const Table&);
 	friend istream& operator>>(istream&, Table&);
@@ -195,3 +199,5 @@ void read_content_from_binary_file(fstream&, vector<Table>&);
 void readFromCsvFiles(fstream&, vector<Table>&); // citire din fisiere csv
 void import_data_from_csv_file_to_existing_table(ifstream&, vector<Table>&, int);
 string* split_string_into_words_comma(string);
+
+void setToVector(set<Entry> entrySet, vector<Entry>& entryVec);
