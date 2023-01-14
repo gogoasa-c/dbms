@@ -168,7 +168,7 @@ public:
 	map<string, int> getTableNames();
 	list<Table> getTableHistory();
 	bool searchTableNames(string);
-//	map<string, int>& getTableNamesRef();
+	map<string, int>& getTableNamesRef();
 	void addToTableNames(string);
 	void addToTableHistory(Table);
 

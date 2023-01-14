@@ -211,6 +211,10 @@ set<Entry> Table::getUniqueEntries() {
 //	return &this->uniqueEntries;
 //}
 
+map<string, int>& Database::getTableNamesRef() {
+	return Database::tableNames;
+}
+
 void Table::setUniqueEntries(set<Entry> newUniqueEntries) {
 	this->uniqueEntries = newUniqueEntries;
 }
@@ -1171,6 +1175,7 @@ void menu(int& argsc, char* argsv[]) {
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 	db->readFromFiles(argsc, argsv);
 	while (true) {
+		db->getTableNamesRef().clear();
 		for (auto i : db->getTables()) {
 //			i.setUniqueEntries(i.getEntries());
 //			setToVector(i.getUniqueEntries(), i.getRefEntries());
