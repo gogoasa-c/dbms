@@ -20,6 +20,26 @@ Database::Database() {
 	//nu e nevoie sa faca nimic
 }
 
+map<string, int> Database::getTableNames() {
+	return Database::tableNames;
+}
+
+void Database::addToTableNames(string key) {
+	Database::tableNames[key] = 1;
+}
+
+//map<string, int>& Database::getTableNamesRef() {
+//	return &Database::tableNames;
+//}
+
+bool Database::searchTableNames(string tableName) {
+	auto iterator = Database::tableNames.find(tableName);
+	if (iterator == Database::tableNames.end()) {
+		return false;
+	}
+	return true;
+}
+
 Database* Database::getInstance() {
 	if (!Database::instance) { // creaza unica instanta a clasei Database
 		instance = new Database;
@@ -1105,6 +1125,11 @@ void menu(int& argsc, char* argsv[]) {
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 	db->readFromFiles(argsc, argsv);
 	while (true) {
+		for (auto i : db->getTables()) {
+			if (!db->searchTableNames(i.getName())) {
+				db->addToTableNames(i.getName()); // tine minte numele tabelului in map
+			}
+		}
 		int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());
 		if (aux == 0)
 			break;//FUNCTIONEAZA

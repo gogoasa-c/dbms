@@ -9,6 +9,7 @@
 #include <fstream>
 #include <filesystem>
 #include <sstream>
+#include <map>
 using namespace std;
 
 
@@ -140,9 +141,10 @@ public:
 	~Table();
 };
 
-class Database : readFromFile { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect instantiat; p.s.: nu e varianta thread-safe
+class Database : readFromFile { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect indstantiat; p.s.: nu e varianta thread-safe
 	static Database* instance; //pointerul cu ajutorul caruia vom instantia unicul obiect de tip Database
 	vector<Table> tables; //vectorul in care tinem tabelele
+	map<string, int> tableNames; //aici tinem numele tabelelor
 	Database();
 public:
 	Database(const Database&) = delete; // nu trebuie sa fie clonabila
@@ -153,6 +155,12 @@ public:
 	vector<Table>& getTables();
 	vector<Table> getTablesNoRef();
 	void setTables(vector<Table>);
+
+	map<string, int> getTableNames();
+
+	bool searchTableNames(string);
+//	map<string, int>& getTableNamesRef();
+	void addToTableNames(string);
 
 	void readFromFiles(int&, char* []); // citire din fisiere txt
 };
