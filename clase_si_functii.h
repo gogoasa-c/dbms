@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <sstream>
 #include <map>
+#include <list>
 using namespace std;
 
 
@@ -145,6 +146,7 @@ class Database : readFromFile { //database va fi o clasa de tip singleton ergo c
 	static Database* instance; //pointerul cu ajutorul caruia vom instantia unicul obiect de tip Database
 	vector<Table> tables; //vectorul in care tinem tabelele
 	map<string, int> tableNames; //aici tinem numele tabelelor
+	list<Table> tableHistory; // tinem istoricul tabelelor create
 	Database();
 public:
 	Database(const Database&) = delete; // nu trebuie sa fie clonabila
@@ -157,10 +159,11 @@ public:
 	void setTables(vector<Table>);
 
 	map<string, int> getTableNames();
-
+	list<Table> getTableHistory();
 	bool searchTableNames(string);
 //	map<string, int>& getTableNamesRef();
 	void addToTableNames(string);
+	void addToTableHistory(Table);
 
 	void readFromFiles(int&, char* []); // citire din fisiere txt
 };

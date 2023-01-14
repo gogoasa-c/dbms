@@ -28,9 +28,14 @@ void Database::addToTableNames(string key) {
 	Database::tableNames[key] = 1;
 }
 
-//map<string, int>& Database::getTableNamesRef() {
-//	return &Database::tableNames;
-//}
+list<Table> Database::getTableHistory() {
+	return Database::tableHistory;
+}
+
+void Database::addToTableHistory(Table t) {
+	Database::tableHistory.push_back(t);
+	return;
+}
 
 bool Database::searchTableNames(string tableName) {
 	auto iterator = Database::tableNames.find(tableName);
@@ -1128,6 +1133,7 @@ void menu(int& argsc, char* argsv[]) {
 		for (auto i : db->getTables()) {
 			if (!db->searchTableNames(i.getName())) {
 				db->addToTableNames(i.getName()); // tine minte numele tabelului in map
+				db->addToTableHistory(i);
 			}
 		}
 		int aux = identify_command_type(split_string_into_words(take_user_input_and_convert_lowercase()), db->getTables());
