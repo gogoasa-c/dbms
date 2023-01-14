@@ -1,4 +1,4 @@
-//aici implementam clasele si functiile propriu-zis
+﻿//aici implementam clasele si functiile propriu-zis
 // Proiect de echipa realziat de: Ghita Valentin, Gogoasa Cristian, Ionel Teodor
 #include "clase_si_functii.h"
 
@@ -690,6 +690,13 @@ bool isFloatingPoint(string s) {
 
 bool no_missing_arguments(string* word) {
 	try{
+		if (word[1] == "menu") {
+			if (stoi(word[0]) == 1) {
+				return true;
+			}
+			exception* e = new exception("\nComanda inexistenta! Ati vrut sa introduceti comanda `menu`?");
+			return false;
+		}
 		if (word[1] == "import")
 		{
 			return true;
@@ -789,7 +796,7 @@ bool no_missing_arguments(string* word) {
 				return false;
 			}
 		}
-		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert" && word[1] != "delete" && word[1] != "update" && word[1] != "import") {
+		else if (word[1] != "create" && word[1] != "drop" && word[1] != "display" && word[1] != "insert" && word[1] != "delete" && word[1] != "update" && word[1] != "import" && word[1] != "menu") {
 			exception* e = new exception("\nComanda inexistenta!\n");
 			throw e;
 			return false;
@@ -807,6 +814,10 @@ int identify_command_type(string* word, vector<Table>& tables) {
 	}
 	if (word[1] == "exit") {
 		return 0;
+	}
+	if (word[1] == "menu" && stoi(word[0]) == 1) {
+		CommandMenu(tables);
+		return 1;
 	}
 	else {
 		if (!no_missing_arguments(word)) {
@@ -1035,7 +1046,7 @@ int identify_command_type(string* word, vector<Table>& tables) {
 				
 			}
 		}
-		else if (word[1] == "delete") {															 // DELETE FROM nume_tabela WHERE nume_coloana = valoare (DELETE permite doar o coloana �n clauza WHERE)
+		else if (word[1] == "delete") {															 // DELETE FROM nume_tabela WHERE nume_coloana = valoare (DELETE permite doar o coloana în clauza WHERE)
 			string tableName = word[3];															 // numele tabelei din care urmeaza sa stergem inregistrari
 			int pozTable = -1;																	 // pozitia tabelei in vectorul de tabele (-1 daca nu exista)
 			if (TableExists(tableName, tables, pozTable)) {						   				 // functie care verifica existenta tabelei in vectorul de tabele si modifica prin referinta pozitia tabelei in caz ca tabela exista 
@@ -1134,6 +1145,155 @@ int identify_command_type(string* word, vector<Table>& tables) {
 	}
 }
 
+void CommandMenu(vector<Table>& tables) {
+	cout << "\n\nBun venit in MENU! Aici gasiti cateva functii si optiuni predefinite, ca sa va ajute sa navigati mai usor in program!\nApasa numarul corespunzator functiei:\n";
+	cout << "0) Intra in modul de introducere manual al comenzilor\n";
+	cout << "1) Afiseaza informatii in legatura cu sintaxa de introducere a comenzilor\n";
+	cout << "2) Afiseaza numele tuturor tabelelor existente in baza de date\n";
+	cout << "3) Afiseaza continutul unei tabele din baza de date\n";
+	cout << "4) Afiseaza continutul tuturor tabelelor din baza de date\n";
+	cout << "5) Sterge o tabela si continutul ei din baza de date\n";
+	cout << "6) Sterge baza de date\n";
+	cout << "7) Credits (Cine a facut aceasta aplicatie)\n";
+	int nr;
+	bool run = true;
+	while (run) {
+		cin >> nr;
+		switch (nr) {
+		case 0:
+		{
+			run = false;
+			break;
+		}
+		case 1:
+		{
+			cout << "\n\nComenzile acceptate pentru gestionarea structurii bazei de date sunt CREATE TABLE, DROP TABLE, DISPLAY TABLE si au sintaxa:\n";
+			cout << "\tCREATE TABLE nume_tabel((nume_coloana_1, tip, dimensiune, valoare_implicita), (nume_coloana_2, tip, dimensiune, valoare_implicita), ...) - comanda ar trebui sa primeasca cel putin 1 coloana\n";
+			cout << "\tDROP TABLE table_name\n";
+			cout << "\tDISPLAY TABLE table_name\n";
+			cout << "\t(tipurile acceptate sunt text, integer, float)\n";
+			cout << "Comenzile CRUD acceptate pentru gestionarea datelor sunt INSERT, SELECT, UPDATE, DELETE\n";
+			cout << "Sintaxa acceptata pentru comenzile CRUD este\n";
+			cout << "\tINSERT INTO nume_tabela VALUES(...); valorile sunt separate prin ',' si au numarul si ordinea exacta ca definitia tabelului";
+			cout << "\n\tDELETE FROM nume_tabela WHERE nume_coloana = valoare(DELETE permite doar o coloana in clauza WHERE)";
+			cout << "\n\tSELECT(cel_putin_o_coloana, ...) | ALL FROM nume_tabela[WHERE nume_coloana = valoare] - clauza WHERE este optionala";
+			cout << "\n\tUPDATE nume_tabela SET nume_coloana = valoare WHERE nume_coloana = valoare(coloana SET poate fi diferita de cea WHERE; UPDATE merge doar pentru o coloana)";
+			cout << "\nAplicatia permite incarcarea de date din fifiere CSV (comma separated values);  simbolul ales pentru a separa valorile este `,` iar sintaxa:";
+			cout << "\n\tIMPORT nume_tabela nume_fisier.CSV";
+			break;
+		}
+		case 2: 
+		{
+			cout << endl;
+			if (!tables.size()) cout << "\nBaza de date este goala!";
+			for (auto i : tables) cout << "\n\t" << i.getName();
+			break;
+		}
+		case 3:
+		{
+			cout << endl;
+			if (!tables.size()) {
+				cout << "\nBaza de date este goala!";
+				break;
+			}
+			int x = 0;
+			for (auto i : tables) cout << "\n\t" << ++x << ") " << i.getName();
+			cout << endl;
+			for (int i = 0; i < 3; i++) {
+				cin >> x;
+				if (x > tables.size() || x < 1) cout << "\nInput gresit. Reciteste optiunile corespunzatoare tabelelor si reintrodu numarul dorit : ";
+				else {
+					string* pstr = new string[4];
+					pstr[0] = "3";
+					pstr[1] = "display";
+					pstr[2] = "table";
+					pstr[3] = tables[x-1].getName();
+					identify_command_type(pstr, tables); //this will also make sure to delete[] pstr
+					break;
+				}
+			}
+			break;
+		}
+		case 4:
+		{
+			cout << endl;
+			if (!tables.size()) {
+				cout << "\nBaza de date este goala!";
+				break;
+			}
+			int j = 0;
+			for (auto i : tables) {
+				string* pstr = new string[4];
+				pstr[0] = "3";
+				pstr[1] = "display";
+				pstr[2] = "table";
+				pstr[3] = tables[j++].getName();
+				identify_command_type(pstr, tables); //this will also make sure to delete[] pstr
+			}
+			break;
+		}
+		case 5:
+		{
+			cout << endl;
+			if (!tables.size()) {
+				cout << "\nBaza de date este goala!";
+				break;
+			}
+			int x = 0;
+			for (auto i : tables) cout << "\n\t" << ++x << ") " << i.getName();
+			cout << endl;
+			for (int i = 0; i < 3; i++) {
+				cin >> x;
+				if (x > tables.size() || x < 1) cout << "\nInput gresit. Reciteste optiunile corespunzatoare tabelelor si reintrodu numarul dorit : ";
+				else {
+					string* pstr = new string[4];
+					pstr[0] = "3";
+					pstr[1] = "drop";
+					pstr[2] = "table";
+					pstr[3] = tables[x - 1].getName();
+					identify_command_type(pstr, tables); //this will also make sure to delete[] pstr
+					break;
+				}
+			}
+			break;
+		}
+		case 6:
+		{
+			int answer;
+			cout << endl << "Aceasta operatie va duce la golirea si stergerea completa a tabelelor din baza de date.\nEsti sigur ca vrei sa continui? Press 1) YES; 2) NO : ";
+			cin >> answer;
+			if (answer != 1) {
+				break;
+			}
+			if (!tables.size()) {
+				cout << "\nBaza de date este goala!";
+				break;
+			}
+			tables.clear();
+			break;
+		}
+		case 7:
+		{
+			cout << "\n\n*****************************GOGOASA PETRE-CRISTIAN*****************************\n";
+			cout << "*****************************GHITA VALENTIN*****************************\n";
+			cout << "*****************************IONEL TEODOR*****************************\n";
+			break;
+		}
+		default:
+			break;
+		}
+		cout << "\n\nBun venit in MENU! Aici gasiti cateva functii si optiuni predefinite, ca sa va ajute sa navigati mai usor in program!\nApasa numarul corespunzator functiei:\n";
+		cout << "0) Intra in modul de introducere manual al comenzilor\n";
+		cout << "1) Afiseaza informatii in legatura cu sintaxa de introducere a comenzilor\n";
+		cout << "2) Afiseaza numele tuturor tabelelor existente in baza de date\n";
+		cout << "3) Afiseaza continutul unei tabele din baza de date\n";
+		cout << "4) Afiseaza continutul tuturor tabelelor din baza de date\n";
+		cout << "5) Sterge o tabela si continutul ei din baza de date\n";
+		cout << "6) Sterge baza de date\n";
+		cout << "7) Credits (Cine a facut aceasta aplicatie)\n";
+	}
+}
+
 void menu(int& argsc, char* argsv[]) {
 	Database* db = db->getInstance();
 	
@@ -1169,6 +1329,7 @@ void menu(int& argsc, char* argsv[]) {
 	
 	cout << "Beta 2.0\n";
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
+	cout << "Ai nevoie de ajutor? Introdu comanda `menu`\n\n";
 	db->readFromFiles(argsc, argsv);
 	while (true) {
 		for (auto i : db->getTables()) {

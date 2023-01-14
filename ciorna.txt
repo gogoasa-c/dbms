@@ -7,7 +7,8 @@ insert into t values dsadsad, 3000
 insert into t values Cristian, 4000
 insert into t values Dian, 5000
 display table t
-
 delete from t where nume = adrian
-
 update t set salariu = 9999 where nume = adrian
+create table studenti nume text 25 0 prenume text 25 0 facultate text 25 0 an int 1 0
+insert into studenti values Ionel Teodor CSIE 2 Ghita Valentin UTCB 1 Gogoasa Cristian UB 3
+display table studenti

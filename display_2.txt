@@ -1,5 +1,10 @@
 
-		newtable		
+		t		
 ++++++++++++++++++++++++++++++++++++++++++++
-col1|text|4|null	col2|int|5|0	
+nume|text|10|0	salariu|int|6|0	
 ++++++++++++++++++++++++++++++++++++++++++++
+         marian		3000		
+        jigdsfg		3000		
+        dsadsad		3000		
+       cristian		4000		
+           dian		5000		

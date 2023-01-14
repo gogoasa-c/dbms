@@ -193,6 +193,7 @@ bool TableExists(string, vector<Table>&, int&); //verifica daca tabelul exista i
 int identify_command_type(string*, vector<Table>&);	//functia principala care face majoritatea muncii
 void menu(int&, char* []);
 bool fileExists(char*);
+void CommandMenu(vector<Table>&);
 
 void write_headers_to_binary_file(fstream&, vector<Table>&);		//scrie capetele de tabel (si numele tabelelor)
 void write_content_to_binary_file(fstream&, vector<Table>&);		//scrie continutul propriu-zis al tabelelor
