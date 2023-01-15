@@ -694,11 +694,15 @@ bool isFloatingPoint(string s) {
 
 bool no_missing_arguments(string* word) {
 	try{
+		if (stoi(word[0]) == 0) {
+			return false;
+		}
 		if (word[1] == "menu") {
 			if (stoi(word[0]) == 1) {
 				return true;
 			}
 			exception* e = new exception("\nComanda inexistenta! Ati vrut sa introduceti comanda `menu`?");
+			throw e;
 			return false;
 		}
 		if (word[1] == "import")
@@ -809,6 +813,7 @@ bool no_missing_arguments(string* word) {
 	}
 	catch (exception* e) {
 		cout << "\n" << e->what() << "\n";
+		delete e;
 	}
 }
 
@@ -1160,9 +1165,17 @@ void CommandMenu(vector<Table>& tables) {
 	cout << "6) Sterge baza de date\n";
 	cout << "7) Credits (Cine a facut aceasta aplicatie)\n";
 	int nr;
+	string str;
 	bool run = true;
 	while (run) {
-		cin >> nr;
+		cin >> str;
+		stringstream ss(str);
+		if (ss >> nr) {
+			nr = stoi(str);
+		}
+		else {
+			nr = 9;
+		}
 		switch (nr) {
 		case 0:
 		{
@@ -1284,17 +1297,20 @@ void CommandMenu(vector<Table>& tables) {
 			break;
 		}
 		default:
+			cout << "\nNu exista aceasta optiune!";
 			break;
 		}
-		cout << "\n\nBun venit in MENU! Aici gasiti cateva functii si optiuni predefinite, ca sa va ajute sa navigati mai usor in program!\nApasa numarul corespunzator functiei:\n";
-		cout << "0) Intra in modul de introducere manual al comenzilor\n";
-		cout << "1) Afiseaza informatii in legatura cu sintaxa de introducere a comenzilor\n";
-		cout << "2) Afiseaza numele tuturor tabelelor existente in baza de date\n";
-		cout << "3) Afiseaza continutul unei tabele din baza de date\n";
-		cout << "4) Afiseaza continutul tuturor tabelelor din baza de date\n";
-		cout << "5) Sterge o tabela si continutul ei din baza de date\n";
-		cout << "6) Sterge baza de date\n";
-		cout << "7) Credits (Cine a facut aceasta aplicatie)\n";
+		if (run == true) {
+			cout << "\n\nBun venit in MENU! Aici gasiti cateva functii si optiuni predefinite, ca sa va ajute sa navigati mai usor in program!\nApasa numarul corespunzator functiei:\n";
+			cout << "0) Intra in modul de introducere manual al comenzilor\n";
+			cout << "1) Afiseaza informatii in legatura cu sintaxa de introducere a comenzilor\n";
+			cout << "2) Afiseaza numele tuturor tabelelor existente in baza de date\n";
+			cout << "3) Afiseaza continutul unei tabele din baza de date\n";
+			cout << "4) Afiseaza continutul tuturor tabelelor din baza de date\n";
+			cout << "5) Sterge o tabela si continutul ei din baza de date\n";
+			cout << "6) Sterge baza de date\n";
+			cout << "7) Credits (Cine a facut aceasta aplicatie)\n";
+		}
 	}
 }
 
