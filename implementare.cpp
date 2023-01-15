@@ -1319,16 +1319,16 @@ void menu(int& argsc, char* argsv[]) {
 	}
 	f2.close();
 
-	fstream f3; // CSV FILE
+	//fstream f3; // CSV FILE
 
-	f3.open("CSV_FILE.csv");
-	if (f3.is_open()) {
-		readFromCsvFiles(f3, db->getTables());
-	}
-	else {
-		cout << "\nCSV_FILE.csv doesn't exist in the program path and therefore will be created at the end of execution in order to load data\n";
-	}
-	f3.close(); // WORKS
+	//f3.open("CSV_FILE.csv");
+	//if (f3.is_open()) {
+	//	readFromCsvFiles(f3, db->getTables());
+	//}
+	//else {
+	//	cout << "\nCSV_FILE.csv doesn't exist in the program path and therefore will be created at the end of execution in order to load data\n";
+	//}
+	//f3.close(); // WORKS
 
 	
 	cout << "Beta 2.0\n";
