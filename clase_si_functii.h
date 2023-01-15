@@ -18,9 +18,10 @@ using namespace std;
 class writeBinaryToFile {
 	virtual void write_headers_to_binary_file(fstream&) = 0;
 	virtual void write_content_to_binary_file(fstream&) = 0;
+	virtual void write_one_table_to_one_binary_file(fstream&, int) = 0;
 };
 
-class readBineryFromFile {
+class readBinaryFromFile {
 	virtual void read_headers_from_binary_file(fstream&) = 0;
 	virtual void read_content_from_binary_file(fstream&) = 0;
 };
@@ -158,7 +159,7 @@ public:
 	~Table();
 };
 
-class Database : readFromFile { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect indstantiat; p.s.: nu e varianta thread-safe
+class Database : readFromFile, writeBinaryToFile, readBinaryFromFile { //database va fi o clasa de tip singleton ergo constructor privat a.i. sa avem un singur obiect indstantiat; p.s.: nu e varianta thread-safe
 	static Database* instance; //pointerul cu ajutorul caruia vom instantia unicul obiect de tip Database
 	vector<Table> tables; //vectorul in care tinem tabelele
 	map<string, int> tableNames; //aici tinem numele tabelelor
@@ -184,6 +185,7 @@ public:
 	void readFromFiles(int&, char* []); // citire din fisiere txt
 	void write_headers_to_binary_file(fstream&);	//scrie capetele de tabel (si numele tabelelor)
 	void write_content_to_binary_file(fstream&);	//scrie continutul propriu-zis al tabelelor
+	void write_one_table_to_one_binary_file(fstream&, int);	//scrie fiecare tabela intr-un fisier binar diferit
 	void read_headers_from_binary_file(fstream&);
 	void read_content_from_binary_file(fstream&);
 };

@@ -1351,6 +1351,8 @@ void menu(int& argsc, char* argsv[]) {
 	cout << "ATENTIE: ENTER confirma inputul/comanda introdusa. EXIT incheie executia. Daca doriti anularea unei comenzi introduceti o comanda eronata.\n\n";   //IMPLEMENTAT. PARE SA FUNCTIONEZE
 	cout << "Ai nevoie de ajutor? Introdu comanda `menu`\n\n";
 	db->readFromFiles(argsc, argsv);
+	int nrOfStartingTables = db->getTables().size();
+
 	while (true) {
 		db->getTableNamesRef().clear();
 		for (auto i : db->getTables()) {
@@ -1379,6 +1381,30 @@ void menu(int& argsc, char* argsv[]) {
 	else
 		cout << "\nERROR content-in-binary.txt cannot be opened. See if the file exists and if it is in the correct path. If yes, check if you have permisions\n";
 	f2.close();
+
+	string fileOfBinaryTableName;
+
+	if (nrOfStartingTables == 0) remove("table_0.bin");
+	for (int i = 0; i < nrOfStartingTables; i++) {
+		fileOfBinaryTableName = "table_";
+		fileOfBinaryTableName += to_string(i);
+		fileOfBinaryTableName += ".bin";
+		remove(fileOfBinaryTableName.data());
+	}
+
+	for (int i = 0; i < db->getTables().size(); i++) {
+		fileOfBinaryTableName = "table_";
+		fileOfBinaryTableName += to_string(i);
+		fileOfBinaryTableName += ".bin";
+		f1.open(fileOfBinaryTableName, ios::out | ios::trunc | ios::binary);
+		if (f1.is_open()) {
+			db->write_one_table_to_one_binary_file(f1, i);
+		}
+		else {
+			cout << "\nERROR something went wrong with the creation of .bin files. Check permissions\n";
+		}
+		f1.close();
+	}
 }
 
 //---------------------------------> TABLE CLASS <-------------------------------------
@@ -1784,6 +1810,75 @@ void Database::read_content_from_binary_file(fstream& f)
 				delete[] buffer;
 			}
 			identify_command_type(command, this->getTables()); //this function also does delete[] command
+		}
+	}
+}
+
+void Database::write_one_table_to_one_binary_file(fstream& f, int i) 
+{
+	if (i < 0 || i >= this->getTables().size()) return;
+
+	//functie bazata pe functiile de write_headers_... su wrute_content_... pt binare;; read there for more info
+
+	//scrierea in binar a partii de header a tabelei
+	{
+		string name;
+		string headerInfo;		//that will be tableHead, dataType or implicitValue
+		int headerDataSize;		//dataSize
+		int lenght;				//va stoca lungimile vectorilor ce urmeaza a fi scrisi in fisier in binar
+		int nrColumns;			//numarul de coloane al unui tabel la un moment dat
+
+
+
+		name = this->getTables()[i].getName();
+		lenght = name.size() + 1;
+		f.write((char*)&lenght, sizeof(int));
+		f.write(name.data(), lenght * sizeof(char));
+
+		nrColumns = this->getTables()[i].getHeader().getTableHead().size();
+		f.write((char*)&nrColumns, sizeof(int));
+		for (int j = 0; j < nrColumns; j++) {				//pt atatea coloane cate are tabelul, vom afisa headerul respectiv
+			//pentru tableHead
+			headerInfo = this->getTables()[i].getHeader().getTableHead()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataType
+			headerInfo = this->getTables()[i].getHeader().getDataType()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+			//pt dataSize
+			headerDataSize = this->getTables()[i].getHeader().getDataSize()[j];
+			f.write((char*)&headerDataSize, sizeof(int));
+			//pt implicitValue
+			headerInfo = this->getTables()[i].getHeader().getImplicitValue()[j];
+			lenght = headerInfo.size() + 1;
+			f.write((char*)&lenght, sizeof(int));
+			f.write(headerInfo.data(), lenght * sizeof(char));
+		}
+	}
+	//scrierea in binar a partii de continut a tabelei
+	{
+		int nrEntries;									//nr of entries per table[i], where i is count for loop
+		int nrColumns;	// == Entry::numberArguments
+		int lenght;
+		int nrArguments;	//look into class Entry
+		string partOfEntry;	//holds the i-th string at the i iteration of the loop of the member string* arguments of class Entry
+
+		
+		nrColumns = this->getTables()[i].getHeader().getTableHead().size();
+		nrEntries = this->getTables()[i].getEntries().size();
+		f.write((char*)&nrEntries, sizeof(int));
+		for (int j = 0; j < nrEntries; j++) {
+			nrArguments = this->getTables()[i].getEntries()[j].getNumberArguments();
+			//aici se mai putea si sa scriem in fisier nr de argumente ale fiecarui entry in parte, dar deja stim ca este egal cu nr de coloane al fiecarei tabele
+			for (int k = 0; k < nrArguments; k++) {
+				lenght = this->getTables()[i].getEntries()[j].getArguments()[k].size() + 1;
+				f.write((char*)&lenght, sizeof(int));
+				partOfEntry = this->getTables()[i].getEntries()[j].getArguments()[k];
+				f.write(partOfEntry.data(), lenght * sizeof(char));
+			}
 		}
 	}
 }
