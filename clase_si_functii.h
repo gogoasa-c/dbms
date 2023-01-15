@@ -12,6 +12,7 @@
 #include <map>
 #include <list>
 #include <set>
+#include <sstream>
 using namespace std;
 
 class writeBinaryToFile {
