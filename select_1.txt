@@ -1,6 +1,8 @@
 
+		cars		
 ++++++++++++++++++++++++++++++++++++++++++++
-nume|text|10|0	salariu|int|6|0	
+carid|int|3|-1	name|text|50|null	
 ++++++++++++++++++++++++++++++++++++++++++++
-        askdafm		4000		
-        altnume		4000		
+              1		honda		
+             10		dacia		
+             75		jaguar		

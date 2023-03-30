@@ -1,17 +1,5 @@
 
-		t		
+		cars		
 ++++++++++++++++++++++++++++++++++++++++++++
-nume|text|10|0	salariu|int|6|0	
+carid|int|3|-1	name|text|50|null	
 ++++++++++++++++++++++++++++++++++++++++++++
-         marian		3000		
-        jigdsfg		3000		
-        dsadsad		3000		
-       cristian		4000		
-           dian		5000		
-         adrian		1000		
-         adrian		2000		
-         marian		3000		
-        jigdsfg		3000		
-        dsadsad		3000		
-       cristian		4000		
-           dian		5000		
